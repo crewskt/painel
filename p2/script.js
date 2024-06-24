@@ -45,7 +45,7 @@ Vue.component("linechart", {
   methods: {
     renderChart() {
       const canvas = this.$el;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("1d");
 
       ctx.clearRect(0, 0, this.width, this.height);
 
@@ -82,7 +82,7 @@ new Vue({
       longShortRatios: {},
       longShortRatioHistory: {},
       sort: {
-        key: "token",
+        key: "percent",
         order: "asc",
       },
       socket: null,
