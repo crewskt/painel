@@ -45,7 +45,7 @@ Vue.component("linechart", {
   methods: {
     renderChart() {
       const canvas = this.$el;
-      const ctx = canvas.getContext("1d");
+      const ctx = canvas.getContext("2d");
 
       ctx.clearRect(0, 0, this.width, this.height);
 
@@ -103,7 +103,7 @@ new Vue({
         percent: "Percent",
         trades: "Trades",
       };
-      return `${keyMap[this.sort.key]}`;
+      return `Ord: ${keyMap[this.sort.key]}`;
     },
     coinsList() {
       let sortedCoins = this.filteredCoins;
@@ -165,7 +165,7 @@ new Vue({
           const response = await fetch(`https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${symbol}&period=5m`);
           if (!response.ok) throw new Error('Failed to fetch');
           const data = await response.json();
-          longShortRatios[symbol] = data.length >= 30 ? Number(data[30].longShortRatio).toFixed(4) : 'N/A';
+          longShortRatios[symbol] = data.length >= 30 ? Number(data[29].longShortRatio).toFixed(4) : 'N/A';
           this.saveLSRToLocalStorage();
         } catch (error) {
           console.error(`Failed to load long/short ratio for ${symbol}:`, error);
