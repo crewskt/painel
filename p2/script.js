@@ -33,10 +33,13 @@ Vue.component("linechart", {
     values: { type: Array, default: () => [], required: true },
   },
   template: '<canvas :width="width" :height="height"></canvas>',
-  mounted() {
-    this.renderChart();
+  watch: {
+    values: {
+      handler: 'renderChart',
+      deep: true,
+    }
   },
-  updated() {
+  mounted() {
     this.renderChart();
   },
   methods: {
@@ -219,6 +222,7 @@ new Vue({
       this.coins = this.coins.map(coin => {
         const ticker = data.find(t => t.s === coin.symbol);
         if (ticker) {
+          const newHistory = coin.history.slice(-29).concat(Number(ticker.c));
           return {
             ...coin,
             close: Number(ticker.c),
@@ -226,6 +230,7 @@ new Vue({
             percent: Number(ticker.P),
             assetVolume: Number(ticker.q),
             trades: Number(ticker.n),
+            history: newHistory,
           };
         }
         return coin;
