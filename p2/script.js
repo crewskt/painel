@@ -176,7 +176,7 @@ new Vue({
 
       const fetchLongShortRatio = (symbol) => {
         return fetch(
-          `https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${symbol}&period=5m`
+          `https://binance.com/futures/data/globalLongShortAccountRatio?symbol=${symbol}&period=5m`
         )
           .then((response) => {
             if (!response.ok) {
