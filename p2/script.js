@@ -186,7 +186,7 @@ new Vue({
           })
           .then((data) => {
             if (data.length >= 30) { // Ensure there are at least 14 entries
-              longShortRatios[symbol] = Number(data[1].longShortRatio).toFixed(4);
+              longShortRatios[symbol] = Number(data[29].longShortRatio).toFixed(4);
             } else {
               longShortRatios[symbol] = 'N/A'; // If there are less than 14 entries
             }
