@@ -1,36 +1,10 @@
-// Função para detectar ferramentas de desenvolvimento
-const detectDevTools = () => {
-  const onKeyPress = (event) => {
-    if (event.code === 'F12' || (event.ctrlKey && event.shiftKey && event.code === 'I')) {
-      alert('Ferramentas de desenvolvimento estão bloqueadas.');
-      // Ações adicionais podem ser adicionadas aqui.
-    }
-  };
-
-  window.addEventListener('keydown', onKeyPress);
-};
-
-// Executar a detecção de ferramentas de desenvolvimento
-detectDevTools();
-
-// Filtros de número comuns
-Vue.filter("toFixed", (num, asset) => {
-  const precision = asset === "USDT" ? 5 : 2;
-  return Number(num).toFixed(precision);
-});
-
-Vue.filter("toMoney", (num) => {
-  return Number(num)
-    .toFixed(0)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-});
-
 // Componente para criar gráfico de linha
 Vue.component("linechart", {
   props: {
     width: { type: Number, default: 400, required: true },
     height: { type: Number, default: 40, required: true },
     values: { type: Array, default: () => [], required: true },
+    positive: { type: Boolean, required: true }, // Nova prop para determinar se a moeda está positiva ou negativa
   },
   template: '<canvas :width="width" :height="height"></canvas>',
   watch: {
@@ -63,7 +37,7 @@ Vue.component("linechart", {
         ctx.lineTo(x, y);
       });
 
-      ctx.strokeStyle = "#7f8fa4";
+      ctx.strokeStyle = this.positive ? "limegreen" : "red"; // Definindo a cor com base na prop 'positive'
       ctx.stroke();
     },
   },
