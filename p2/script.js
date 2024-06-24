@@ -103,7 +103,7 @@ new Vue({
         percent: "Percent",
         trades: "Trades",
       };
-      return `Ord: ${keyMap[this.sort.key]}`;
+      return `${keyMap[this.sort.key]}`;
     },
     coinsList() {
       let sortedCoins = this.filteredCoins;
