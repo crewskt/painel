@@ -5,23 +5,22 @@
   <title>Futuros Binance - betabot.store</title>
   <link rel="stylesheet" href="https://betabot.store/p2/style.css" />
   <link rel="shortcut icon" href="https://betabot.store/beta.ico" />
-</head>
+  <style>
+    /* Estilo para o ícone do Telegram flutuante */
+    .telegram-float {
+      position: fixed;
+      bottom: 20px; /* Ajuste a posição vertical conforme necessário */
+      right: 20px; /* Ajuste a posição horizontal conforme necessário */
+      z-index: 1000; /* Garante que o ícone esteja sempre visível */
+      cursor: pointer;
+      transition: transform 0.20s ease-in-out;
+    }
 
-<style> 
-  /* Estilo para o ícone do Telegram flutuante */
-  .telegram-float {
-    position: fixed;
-    bottom: 20px; /* Ajuste a posição vertical conforme necessário */
-    right: 20px; /* Ajuste a posição horizontal conforme necessário */
-    z-index: 1000; /* Garante que o ícone esteja sempre visível */
-    cursor: pointer;
-    transition: transform 0.20s ease-in-out;
-  }
-  
-  .telegram-float:hover {
-    transform: scale(1.1); /* Efeito de escala ao passar o mouse */
-  }
-</style>
+    .telegram-float:hover {
+      transform: scale(1.1); /* Efeito de escala ao passar o mouse */
+    }
+  </style>
+</head>
 
 <body>
   <!-- partial:index.partial.html -->
@@ -68,8 +67,6 @@
               <li @click="sortBy('trades', 'desc')"><span class="text-faded">Ord:</span> Top Trades (Maior para Menor)</li>
               <li @click="sortBy('longShortRatio', 'asc')"><span class="text-faded">Ord:</span> Long/Short (Menor para Maior)</li>
               <li @click="sortBy('longShortRatio', 'desc')"><span class="text-faded">Ord:</span> Long/Short (Maior para Menor)</li>
-              
-
             </ul>
           </div>
           <div class="dropdown">
@@ -120,7 +117,8 @@
             </div>
           </div>
           <div class="main-grid-chart">
-            <linechart :width="400" :height="40" :values="c.history"></linechart>
+            <!-- Integração do componente linechart Vue.js -->
+            <canvas :width="400" :height="40"></canvas>
           </div>
         </div>
       </div>
@@ -145,15 +143,3 @@
   <script>
     (adsbygoogle = window.adsbygoogle || []).push({});
   </script>
-
-  <!-- Vue.js and other scripts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
-  <script src="https://betabot.store/p2/script.js"></script>
-
-  <a href="https://t.me/BETABOTROMPIMENTO" target="_blank" class="telegram-float">
-    <img src="https://betabot.store/rastreador/telegram.png" alt="Telegram Icon" style="width: 50px; height: 50px;">
-  </a>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8851688708766894"
-     crossorigin="anonymous"></script>
-</body>
-</html>
