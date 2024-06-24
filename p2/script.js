@@ -1,3 +1,21 @@
+// Função para detectar ferramentas de desenvolvimento
+const detectDevTools = () => {
+  const onKeyPress = (event) => {
+    if (event.code === 'F12' || (event.ctrlKey && event.shiftKey && event.code === 'I')) {
+      alert('Ferramentas de desenvolvimento estão bloqueadas.');
+      // Você pode adicionar ações adicionais aqui, como redirecionar ou alterar comportamento.
+      // Porém, note que isso pode ser contornado por desenvolvedores experientes.
+    }
+  };
+
+  window.addEventListener('keydown', onKeyPress);
+};
+
+// Executar a detecção de ferramentas de desenvolvimento
+detectDevTools();
+
+// Código original começa aqui
+
 // common number filters
 Vue.filter("toFixed", (num, asset) => {
   const precision = asset === "USDT" ? 5 : 2; // Define 5 decimal places for USDT, 2 for others
@@ -260,4 +278,3 @@ new Vue({
     },
   },
 });
-
