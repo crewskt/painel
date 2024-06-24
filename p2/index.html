@@ -44,7 +44,6 @@
         <div class="flex-row flex-middle">
           <div class="dropdown">
             <div class="form-input text-nowrap shadow-box">▼ {{ limit }}</div>
-            <ul>
               <li @click="setLimit(0)"><span class="text-faded">Show:</span> All</li>
               <li @click="setLimit(2)"><span class="text-faded">Show:</span> 2</li>
               <li @click="setLimit(10)"><span class="text-faded">Show:</span> 10</li>
@@ -56,16 +55,12 @@
           <div class="dropdown">
             <div class="form-input text-nowrap shadow-box">▼ {{ sortLabel }}</div>
             <ul>
-              <li @click="sortBy('token', 'asc')"><span class="text-faded">Ord:</span> Token (A-Z)</li>
-              <li @click="sortBy('token', 'desc')"><span class="text-faded">Ord:</span> Token (Z-A)</li>
-              <li @click="sortBy('close', 'asc')"><span class="text-faded">Ord:</span> Preço (Menor para Maior)</li>
-              <li @click="sortBy('close', 'desc')"><span class="text-faded">Ord:</span> Preço (Maior para Menor)</li>
-              <li @click="sortBy('assetVolume', 'asc')"><span class="text-faded">Ord:</span> Volume (Menor para Maior)</li>
-              <li @click="sortBy('assetVolume', 'desc')"><span class="text-faded">Ord:</span> Volume (Maior para Menor)</li>
-              <li @click="sortBy('percent', 'asc')"><span class="text-faded">Ord:</span> Percentual (Menor para Maior)</li>
-              <li @click="sortBy('percent', 'desc')"><span class="text-faded">Ord:</span> Percentual (Maior para Menor)</li>
-              <li @click="sortBy('trades', 'asc')"><span class="text-faded">Ord:</span> Top Trades (Menor para Maior)</li>
-              <li @click="sortBy('trades', 'desc')"><span class="text-faded">Ord:</span> Top Trades (Maior para Menor)</li>
+              <li @click="sortBy('token', 'asc')"><span class="text-faded">Ord:</span> Token</li>
+              <li @click="sortBy('close', 'desc')"><span class="text-faded">Ord:</span> Price</li>
+              <li @click="sortBy('assetVolume', 'desc')"><span class="text-faded">Ord:</span> Volume</li>
+              <li @click="sortBy('percent', 'desc')"><span class="text-faded">Ord:</span> Percent</li>
+              <li @click="sortBy('trades', 'desc')"><span class="text-faded">Ord:</span> Trades</li>
+            </ul>
               <li @click="sortBy('longShortRatio', 'asc')"><span class="text-faded">Ord:</span> Long/Short (Menor para Maior)</li>
               <li @click="sortBy('longShortRatio', 'desc')"><span class="text-faded">Ord:</span> Long/Short (Maior para Menor)</li>
               
