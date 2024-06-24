@@ -82,8 +82,8 @@ new Vue({
       longShortRatios: {},
       longShortRatioHistory: {},
       sort: {
-        key: "Percent",
-        order: "desc",
+        key: "token",
+        order: "asc",
       },
       socket: null,
     };
