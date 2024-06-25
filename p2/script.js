@@ -45,13 +45,12 @@ Vue.component("linechart", {
     values: { type: Array, default: () => [], required: true },
     volatility: { type: Number, default: 0, required: true },
   },
-  template: `
-    <div>
+  template: 
+    `<div>
       <canvas :width="width" :height="height"></canvas>
       <span v-if="volatility >= 5" style="margin-left: 10px;"></span>
       <span v-else-if="volatility < 5" style="margin-left: 10px;"></span>
-    </div>
-  `,
+    </div>`,
   watch: {
     values: {
       handler: 'renderChart',
@@ -109,6 +108,7 @@ new Vue({
         order: "asc",
       },
       socket: null,
+      latestCoin: null,
     };
   },
   created() {
@@ -174,6 +174,7 @@ new Vue({
             longShortRatio: null,
             volatility: 0, // Inicialmente 0, você pode calcular isso conforme necessário
           }));
+        this.latestCoin = this.coins[0]; // Assumindo que a moeda mais recente é a primeira da lista
         this.loadLongShortRatios();
         this.status = 1;
       } catch (error) {
@@ -284,5 +285,13 @@ new Vue({
         this.updateCoinsWithRatios();
       }
     },
+  },
+  watch: {
+    coins() {
+      // Exibir a última moeda listada
+      if (this.latestCoin) {
+        document.getElementById('latest-coin').innerHTML = `Última moeda listada: ${this.latestCoin.token}`;
+      }
+    }
   },
 });
