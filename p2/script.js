@@ -1,5 +1,3 @@
-COLOQUE PARA MOSTRAR A ULTIMA MOEDA LISTADA NA BINANCE FUTUROS FAPI.BINANCE 
-
 // Função para detectar ferramentas de desenvolvimento
 const detectDevTools = () => {
   const onKeyPress = (event) => {
