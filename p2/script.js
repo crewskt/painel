@@ -152,7 +152,7 @@ new Vue({
         const response = await fetch("https://fapi.binance.com/fapi/v1/ticker/24hr");
         const data = await response.json();
         this.coins = data.filter(d => d.symbol.endsWith("USDT") && 
-          !["DGBUSDT", "WAVESUSDT", "MDTUSDT","RADUSDT","STRAXUSDT","SLPUSDT","IDEXUSDT","CVXUSDT","SNTUSDT","STPTUSDT","CTKUSDT","GLMRUSDT"].includes(d.symbol))
+          !["DGBUSDT", "WAVESUSDT", "MDTUSDT","RADUSDT","STRAXUSDT","SLPUSDT","IDEXUSDT","CVXUSDT","SNTUSDT","STPTUSDT","CTKUSDT","GLMRUSDT","AGIXUSDT","OCEANUSDT"].includes(d.symbol))
           .map(d => ({
             symbol: d.symbol,
             pair: d.symbol,
