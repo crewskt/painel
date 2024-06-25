@@ -127,6 +127,9 @@ new Vue({
         assetVolume: "Volume",
         percent: "Percent",
         trades: "Trades",
+        longShortRatio: "Long/Short",
+        volatility: "volatility",
+
       };
       return ` ${keyMap[this.sort.key]}`;
     },
