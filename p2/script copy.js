@@ -129,6 +129,7 @@
           trades: "Trades",
           longShortRatio: "Long/Short",
           volatility: "Volatility",
+
         };
         return ` ${keyMap[this.sort.key]}`;
       },
@@ -182,7 +183,7 @@
           
           // Obter a última moeda listada
           this.lastListedCoin = this.coins[this.coins.length - 1].symbol;
-  
+
           this.loadLongShortRatios();
           this.status = 1;
         } catch (error) {
@@ -213,10 +214,10 @@
             };
           }
         };
-  
+
         // Initial fetch
         await Promise.all(symbols.map(symbol => fetchLongShortRatio(symbol)));
-  
+
         // Set interval to update every 5 minutes
         setInterval(async () => {
           await Promise.all(symbols.map(symbol => fetchLongShortRatio(symbol)));
@@ -242,22 +243,22 @@
         const url = "wss://fstream.binance.com/stream";
         const stream = "!ticker@arr";
         this.socket = new WebSocket(`${url}?streams=${stream}`);
-  
+
         this.socket.onopen = () => {
           this.loaderVisible = false;
           console.log("WebSocket connection opened.");
         };
-  
+
         this.socket.onmessage = (event) => {
           const data = JSON.parse(event.data).data;
           this.updateCoinPrices(data);
         };
-  
+
         this.socket.onclose = () => {
           console.log("WebSocket connection closed. Reconnecting...");
           setTimeout(this.connectSocket, 1000);
         };
-  
+
         this.socket.onerror = (error) => {
           console.error("WebSocket error:", error);
           this.socket.close();
@@ -296,4 +297,3 @@
       },
     },
   });
-  
