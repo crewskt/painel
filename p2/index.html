@@ -117,12 +117,13 @@
       </div>
     </main>
 
-    <div class="loader-wrap" :class="{ 'visible': loaderVisible }">
-      <img src="https://betabot.store/painel.gif" alt="Beta Bot" v-if="status !== 3" class="loading" style="width: 350px; height: 350px;">
-      <div v-if="status === 0"></div>
-      <div v-if="status === 1"></div>
-      <div v-if="status === 2">SEJA BEM-VINDO!</div>
-    </div>
+<div class="loader-wrap" :class="{ 'visible': loaderVisible }">
+  <img src="https://betabot.store/painel.gif" alt="Beta Bot" v-if="status !== 3" class="loading" style="width: 350px; height: 350px;">
+  <div v-if="status === 0"></div>
+  <div v-if="status === 1"></div>
+  <div v-if="status === 2">SEJA BEM-VINDO!</div>
+</div>
+
 
     <!-- Latest Coin Display -->
     <div id="latest-coin"></div>
