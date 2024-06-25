@@ -1,4 +1,23 @@
+// Função para detectar ferramentas de desenvolvimento
+const detectDevTools = () => {
+  const onKeyPress = (event) => {
+    if (event.code === 'F12' || (event.ctrlKey && event.shiftKey && event.code === 'I') || (event.ctrlKey && event.shiftKey && event.code === 'C')) {
+      alert('Ferramentas de desenvolvimento estão bloqueadas.');
+      // Ações adicionais podem ser adicionadas aqui.
+    }
+  };
 
+  const onRightClick = (event) => {
+    event.preventDefault();
+    alert('Ferramentas de desenvolvimento estão bloqueadas.');
+  };
+
+  window.addEventListener('keydown', onKeyPress);
+  window.addEventListener('contextmenu', onRightClick);
+};
+
+// Executar a detecção de ferramentas de desenvolvimento
+detectDevTools();
 
 // Filtros de número comuns
 Vue.filter("toFixed", (num, asset) => {
@@ -103,7 +122,7 @@ new Vue({
         order: "asc",
       },
       socket: null,
-      lastListedCoin: null, // Estado para a última moeda listada
+      lastListedCoin: null, // Adicionando estado para última moeda listada
       isDarkMode: false, // Estado para modo escuro
       favoriteCoins: [], // Estado para moedas favoritas
     };
@@ -126,6 +145,7 @@ new Vue({
         trades: "Trades",
         longShortRatio: "Long/Short",
         volatility: "Volatility",
+
       };
       return ` ${keyMap[this.sort.key]}`;
     },
@@ -179,24 +199,13 @@ new Vue({
           }));
         
         // Obter a última moeda listada
-        await this.loadLastListedCoin();
+        this.lastListedCoin = this.coins[this.coins.length - 1].symbol;
 
         this.loadLongShortRatios();
         this.status = 1;
       } catch (error) {
         console.error("Failed to load coins:", error);
         this.status = -1;
-      }
-    },
-    async loadLastListedCoin() {
-      try {
-        const response = await fetch("https://fapi.binance.com/fapi/v1/exchangeInfo");
-        const data = await response.json();
-        const symbols = data.symbols.filter(s => s.contractType === "PERPETUAL" && s.symbol.endsWith("USDT"));
-        symbols.sort((a, b) => new Date(b.onboardDate) - new Date(a.onboardDate));
-        this.lastListedCoin = symbols[0].symbol.replace("USDT", "");
-      } catch (error) {
-        console.error("Failed to load last listed coin:", error);
       }
     },
     async loadLongShortRatios() {
@@ -304,19 +313,25 @@ new Vue({
     },
     toggleDarkMode() {
       this.isDarkMode = !this.isDarkMode;
+      document.body.classList.toggle('dark-mode', this.isDarkMode);
     },
-    toggleFavorite(coin) {
-      if (this.favoriteCoins.includes(coin.symbol)) {
-        this.favoriteCoins = this.favoriteCoins.filter(fav => fav !== coin.symbol);
-      } else {
-        this.favoriteCoins.push(coin.symbol);
+    addFavorite(symbol) {
+      if (!this.favoriteCoins.includes(symbol)) {
+        this.favoriteCoins.push(symbol);
+        this.saveFavoriteCoins();
       }
-      localStorage.setItem("favoriteCoins", JSON.stringify(this.favoriteCoins));
+    },
+    removeFavorite(symbol) {
+      this.favoriteCoins = this.favoriteCoins.filter(fav => fav !== symbol);
+      this.saveFavoriteCoins();
+    },
+    saveFavoriteCoins() {
+      localStorage.setItem('favoriteCoins', JSON.stringify(this.favoriteCoins));
     },
     loadFavoriteCoins() {
-      const favoriteCoins = localStorage.getItem("favoriteCoins");
-      if (favoriteCoins) {
-        this.favoriteCoins = JSON.parse(favoriteCoins);
+      const favData = localStorage.getItem('favoriteCoins');
+      if (favData) {
+        this.favoriteCoins = JSON.parse(favData);
       }
     },
   },

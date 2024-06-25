@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Futuros Binance - betabot.store</title>
-  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="https://betabot.store/p2/style.css" />
   <link rel="shortcut icon" href="https://betabot.store/beta.ico" />
   <style>
     .telegram-float {
@@ -38,10 +38,10 @@
         </div>
         <div class="text-primary if-medium">
           <a class="logo-footer" href="javascript:location.reload(true)">
-            <img src="./betafuturos.svg" width="200" height="80" alt="Beta Bot Futuros">
+            <img src="./betafuturos.svg" width="200" height="100" alt="Beta Bot Futuros">
           </a>
           <!-- Adicionando um elemento para mostrar a última moeda listada -->
-          <span v-if="lastListedCoin" class="last-listed-coin">Último Token listado: {{ lastListedCoin }}</span>
+          <span v-if="lastListedCoin" class="last-listed-coin">Última moeda listada: {{ lastListedCoin }}</span>
         </div>
         <div class="flex-row flex-middle">
           <div class="dropdown">
@@ -138,9 +138,22 @@
        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
        data-ad-slot="XXXXXXXXXX"
        data-ad-format="auto"></ins>
-  
  
- 
+
+  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+
+    window.addEventListener('load', () => {
+      const audio = document.getElementById('welcome-audio');
+      audio.play();
+      audio.muted = false; // Unmute the audio once it starts playing
+
+      setTimeout(() => {
+        audio.pause();
+      }, 2000);
+    });
+  </script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
   <script src="./script.js"></script>
 
