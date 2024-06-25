@@ -20,6 +20,21 @@
       transform: scale(1.1);
     }
   </style>
+
+
+<style>
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #f0f0f0;
+  }
+
+  .last-listed {
+    margin-left: 10px;
+  }
+</style>
 </head>
 <body>
   <div id="app" v-cloak>
@@ -33,14 +48,10 @@
         </div>
         <div class="text-primary if-medium">
           <a class="logo-footer" href="javascript:location.reload(true)">
-            <img src="./betafuturos.svg" width="200" height="100" alt="Beta Bot Futuros">              <span class="last-listed"></span>
-          </a>
+           <img src="./betafuturos.svg" width="200" height="100" alt="Beta Bot Futuros">              <span class="last-listed"></span>          </a>
 
-                Última moeda listada: {{ lastListedCoin }}
-              </span>
-
-
-          </div>
+           <span class="last-listed">Última moeda listada: {{ lastListedCoin }}</span>
+              </span>          </div>
           
 
         <div class="flex-row flex-middle">
@@ -81,36 +92,28 @@
         <div class="main-grid-item" v-for="c in coinsList" :key="c.symbol" :class="c.style">
           <div class="main-grid-info flex-row flex-top flex-stretch">
             <div class="push-right">
-              <img :src="c.icon" :alt="c.pair">
-            </div>
+              <img :src="c.icon" :alt="c.pair">            </div>
             <div class="flex-1 shadow-text">
               <div class="flex-row flex-top flex-space">
                 <div class="text-left text-clip push-right">
                   <h1 class="text-primary text-clip">
-                    {{ c.token }}<small class="text-faded text-small text-condense">/{{ c.asset }}</small>
-                  </h1>
+                    {{ c.token }}<small class="text-faded text-small text-condense">/{{ c.asset }}</small>                  </h1>
                   <h2 class="text-bright text-clip">
-                    {{ c.close | toFixed(asset) }}
-                  </h2>
+                    {{ c.close | toFixed(asset) }}                  </h2>
                   <div class="text-clip">
-                    LSR: {{ c.longShortRatio }}
-                  </div>
+                    LSR: {{ c.longShortRatio }}                  </div>
                 </div>
                 <div class="text-right">
                   <div class="color text-big text-clip">
-                    {{ c.arrow }} {{ c.sign }}{{ c.percent | toFixed(2) }}%
-                  </div>
+                    {{ c.arrow }} {{ c.sign }}{{ c.percent | toFixed(2) }}%                  </div>
                   <div class="text-clip">
-                    {{ c.sign }}{{ c.change | toFixed(asset) }} <small class="text-faded">24h</small>
-                  </div>
+                    {{ c.sign }}{{ c.change | toFixed(asset) }} <small class="text-faded">24h</small>                  </div>
                   <div class="text-clip">
-                    {{ c.assetVolume | toMoney }} <small class="text-faded">Vol</small>
-                  </div>
+                    {{ c.assetVolume | toMoney }} <small class="text-faded">Vol</small>                  </div>
                   <div class="text-clip">
                     Volat: {{ c.volatility | toFixed(2) }}%
                     <span v-if="c.volatility >= 15">🔥</span>
-                    <span v-else>❄️</span>
-                  </div>
+                    <span v-else>❄️</span>                  </div>
                 </div>
               </div>
             </div>
@@ -140,8 +143,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
   <script src="./script.js"></script>
   <a href="https://t.me/BETABOTROMPIMENTO" target="_blank" class="telegram-float">
-    <img src="https://betabot.store/rastreador/telegram.png" alt="Telegram Icon" style="width: 50px; height: 50px;">
-  </a>
+    <img src="https://betabot.store/rastreador/telegram.png" alt="Telegram Icon" style="width: 50px; height: 50px;">  </a>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8851688708766894" crossorigin="anonymous"></script>
 </body>
 </html>
