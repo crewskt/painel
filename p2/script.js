@@ -36,8 +36,8 @@ Vue.component("linechart", {
   template: `
     <div>
       <canvas :width="width" :height="height"></canvas>
-      <span v-if="volatility >= 5" style="margin-left: 10px;">🔥</span>
-      <span v-else-if="volatility < 5" style="margin-left: 10px;">❄️</span>
+      <span v-if="volatility >= 5" style="margin-left: 10px;"></span>
+      <span v-else-if="volatility < 5" style="margin-left: 10px;"></span>
     </div>
   `,
   watch: {
