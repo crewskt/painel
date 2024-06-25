@@ -5,7 +5,7 @@ const detectDevTools = () => {
       alert('Ferramentas de desenvolvimento estão bloqueadas.');
       // Ações adicionais podem ser adicionadas aqui.
     }
-  };
+  }; 
 
   window.addEventListener('keydown', onKeyPress);
 };
