@@ -25,70 +25,55 @@ Vue.filter("toMoney", (num) => {
     .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 });
 
-Vue.filter("formatVolume", (num) => {
-  if (num >= 1e9) {
-    return (num / 1e9).toFixed(3) + 'B';
-  } else if (num >= 1e6) {
-    return (num / 1e6).toFixed(3) + 'M';
-  } else if (num >= 1e3) {
-    return (num / 1e3).toFixed(3) + 'K';
-  } else {
-    return num.toFixed(3);
-  }
+Vue.filter("formatVolume", (value) => {
+  if (value >= 1000000000) return (value / 1000000000).toFixed(2) + "B";
+  if (value >= 1000000) return (value / 1000000).toFixed(2) + "M";
+  if (value >= 1000) return (value / 1000).toFixed(2) + "K";
+  return value.toString();
 });
 
-// Componente para criar gráfico de linha
 Vue.component("linechart", {
-  props: {
-    width: { type: Number, default: 400, required: true },
-    height: { type: Number, default: 40, required: true },
-    values: { type: Array, default: () => [], required: true },
-    volatility: { type: Number, default: 0, required: true },
-  },
-  template: `
-    <div>
-      <canvas :width="width" :height="height"></canvas>
-      <span v-if="volatility >= 5" style="margin-left: 10px;"></span>
-      <span v-else-if="volatility < 5" style="margin-left: 10px;"></span>
-    </div>
-  `,
-  watch: {
-    values: {
-      handler: 'renderChart',
-      deep: true,
-    }
-  },
+  props: ["values", "width", "height"],
+  template: `<canvas :width="width" :height="height"></canvas>`,
   mounted() {
-    this.renderChart();
-  },
-  methods: {
-    renderChart() {
-      const canvas = this.$el.querySelector('canvas');
-      if (!canvas) return;
+    const ctx = this.$el.getContext("2d");
+    const gradient = ctx.createLinearGradient(0, 0, 0, this.height);
+    gradient.addColorStop(0, "rgba(0, 255, 0, 0.5)");
+    gradient.addColorStop(1, "rgba(255, 0, 0, 0.5)");
 
-      const ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, this.width, this.height);
-
-      const max = Math.max(...this.values);
-      const min = Math.min(...this.values);
-      const range = max - min || 1;
-      const scaledValues = this.values.map(val => ((val - min) / range) * this.height);
-
-      ctx.beginPath();
-      ctx.moveTo(0, this.height - scaledValues[0]);
-
-      scaledValues.forEach((val, index) => {
-        const x = (index / (scaledValues.length - 1)) * this.width;
-        const y = this.height - val;
-
-        // Definir cor da linha como verde
-        ctx.strokeStyle = "#33f702";
-
-        ctx.lineTo(x, y);
-      });
-
-      ctx.stroke();
-    },
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: this.values.map((_, i) => i + 1),
+        datasets: [
+          {
+            data: this.values,
+            borderColor: "rgba(75, 192, 192, 1)",
+            backgroundColor: gradient,
+            fill: true,
+            borderWidth: 2,
+            pointRadius: 0,
+            lineTension: 0,
+          },
+        ],
+      },
+      options: {
+        responsive: false,
+        scales: {
+          x: {
+            display: false,
+          },
+          y: {
+            display: false,
+          },
+        },
+        elements: {
+          point: {
+            radius: 0,
+          },
+        },
+      },
+    });
   },
 });
 
@@ -97,126 +82,80 @@ new Vue({
   data() {
     return {
       search: "",
-      limit: 20,
+      limit: 10,
+      sortLabel: "Ord: Price",
       asset: "USDT",
-      status: 0,
-      loaderVisible: true,
       coins: [],
-      longShortRatios: {},
-      longShortRatioHistory: {},
-      sort: {
-        key: "token",
-        order: "asc",
-      },
+      longShortRatios: [],
       socket: null,
+      loaderVisible: true,
+      status: 0,
     };
   },
-  created() {
-    this.loadCoins();
-    this.connectSocket();
-    this.loadLSRFromLocalStorage();
-    this.loadLongShortRatios(); // Iniciar o carregamento dos ratios long/short
-    setInterval(this.loadLongShortRatios, 300000); // Atualizar a cada 5 minutos
-  },
   computed: {
-    sortLabel() {
-      const keyMap = {
-        token: "Token",
-        close: "Price",
-        assetVolume: "Volume",
-        percent: "Percent",
-        trades: "Trades",
-      };
-      return `Ord: ${keyMap[this.sort.key]}`;
-    },
     coinsList() {
-      let sortedCoins = this.filteredCoins;
-      if (this.sort.key) {
-        sortedCoins = sortedCoins.sort((a, b) => {
-          const aVal = a[this.sort.key];
-          const bVal = b[this.sort.key];
-          const comparison = aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-          return this.sort.order === "asc" ? comparison : -comparison;
-        });
+      let filteredCoins = this.coins.filter((coin) =>
+        coin.token.toLowerCase().includes(this.search.toLowerCase())
+      );
+
+      if (this.asset !== "All") {
+        filteredCoins = filteredCoins.filter(
+          (coin) => coin.asset === this.asset
+        );
       }
-      return this.limit > 0 ? sortedCoins.slice(0, this.limit) : sortedCoins;
+
+      return filteredCoins.slice(0, this.limit);
     },
-    filteredCoins() {
-      return this.coins.filter(c => c.token.toLowerCase().includes(this.search.toLowerCase()));
-    },
+  },
+  mounted() {
+    this.loadCoins();
+    this.loadLongShortRatios();
+    this.connectSocket();
   },
   methods: {
-    async loadCoins() {
-      try {
-        const response = await fetch("https://fapi.binance.com/fapi/v1/ticker/24hr");
-        const data = await response.json();
-        this.coins = data.filter(d => d.symbol.endsWith("USDT") && 
-          !["DGBUSDT", "WAVESUSDT", "MDTUSDT","RADUSDT","STRAXUSDT","SLPUSDT","IDEXUSDT","CVXUSDT","SNTUSDT","STPTUSDT","CTKUSDT","GLMRUSDT"].includes(d.symbol))
-          .map(d => ({
-            symbol: d.symbol,
-            pair: d.symbol,
-            token: d.symbol.replace("USDT", ""),
-            asset: "USDT",
-            icon: `https://betabot.store/icons/${d.symbol.replace("USDT", "").toLowerCase()}.png`,
-            close: Number(d.lastPrice),
-            open: Number(d.openPrice),
-            high: Number(d.highPrice),
-            low: Number(d.lowPrice),
-            change: Number(d.priceChange),
-            percent: Number(d.priceChangePercent),
-            assetVolume: Number(d.volume),
-            trades: Number(d.count),
-            history: [Number(d.lastPrice) * 0.95, Number(d.lastPrice) * 1.05, Number(d.lastPrice)],
-            style: {
-              gain: d.priceChange > 0,
-              loss: d.priceChange < 0,
-            },
-            longShortRatio: null,
-            volatility: 0, // Inicialmente 0, você pode calcular isso conforme necessário
-          }));
-        this.loadLongShortRatios();
-        this.status = 1;
-      } catch (error) {
-        console.error("Failed to load coins:", error);
-        this.status = -1;
-      }
+    loadCoins() {
+      fetch("https://api.binance.com/api/v3/ticker/24hr")
+        .then((response) => response.json())
+        .then((data) => {
+          this.coins = data.map((ticker) => {
+            const volatility = ((ticker.highPrice - ticker.lowPrice) / ticker.openPrice) * 100;
+            return {
+              symbol: ticker.symbol,
+              token: ticker.symbol.replace('USDT', ''),
+              asset: 'USDT',
+              close: Number(ticker.lastPrice),
+              change: Number(ticker.priceChange),
+              percent: Number(ticker.priceChangePercent),
+              assetVolume: Number(ticker.quoteVolume),
+              trades: Number(ticker.count),
+              history: Array(30).fill(Number(ticker.lastPrice)), // Exemplo de histórico
+              volatility: volatility,
+            };
+          });
+
+          this.sortBy('close', 'desc'); // Ordena por preço como padrão
+          this.loaderVisible = false;
+        });
     },
-    async loadLongShortRatios() {
-      const symbols = this.coins.map(c => c.symbol);
-      
-      const fetchLongShortRatio = async (symbol) => {
-        try {
-          const response = await fetch(`https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${symbol}&period=5m`);
-          if (!response.ok) throw new Error('Failed to fetch');
-          const data = await response.json();
-          const ratio = data.length >= 30 ? Number(data[29].longShortRatio).toFixed(4) : 'N/A';
-          this.longShortRatios = {
-            ...this.longShortRatios,
-            [symbol]: ratio,
-          };
+    loadLongShortRatios() {
+      fetch("https://fapi.binance.com/futures/data/globalLongShortAccountRatio")
+        .then((response) => response.json())
+        .then((data) => {
+          this.longShortRatios = data;
           this.updateCoinsWithRatios();
-        } catch (error) {
-          console.error(`Failed to load long/short ratio for ${symbol}:`, error);
-          this.longShortRatios = {
-            ...this.longShortRatios,
-            [symbol]: 'N/A',
-          };
-        }
-      };
-
-      // Initial fetch
-      await Promise.all(symbols.map(symbol => fetchLongShortRatio(symbol)));
-
-      // Set interval to update every 5 minutes
-      setInterval(async () => {
-        await Promise.all(symbols.map(symbol => fetchLongShortRatio(symbol)));
-      }, 300000); // 5 minutes in milliseconds
+          this.saveLSRToLocalStorage();
+        });
     },
     updateCoinsWithRatios() {
-      this.coins = this.coins.map(coin => ({
-        ...coin,
-        longShortRatio: this.longShortRatios[coin.symbol] || 'N/A',
-      }));
+      this.coins = this.coins.map((coin) => {
+        const ratio = this.longShortRatios.find(
+          (r) => r.symbol === coin.symbol
+        );
+        return {
+          ...coin,
+          longShortRatio: ratio ? ratio.longShortRatio : null,
+        };
+      });
     },
     setLimit(limit) {
       this.limit = limit;
@@ -224,27 +163,27 @@ new Vue({
     filterAsset(asset) {
       this.asset = asset;
     },
-    sortBy(key, order) {
-      this.sort.key = key;
-      this.sort.order = order;
+    sortBy(field, order) {
+      const sortedCoins = [...this.coins].sort((a, b) => {
+        if (order === 'asc') {
+          return a[field] > b[field] ? 1 : -1;
+        } else {
+          return a[field] < b[field] ? 1 : -1;
+        }
+      });
+
+      this.coins = sortedCoins;
+      this.sortLabel = `Ord: ${field.charAt(0).toUpperCase() + field.slice(1)}`;
     },
     connectSocket() {
-      const url = "wss://fstream.binance.com/stream";
-      const stream = "!ticker@arr";
-      this.socket = new WebSocket(`${url}?streams=${stream}`);
-
-      this.socket.onopen = () => {
-        this.loaderVisible = false;
-        console.log("WebSocket connection opened.");
-      };
+      this.socket = new WebSocket("wss://stream.binance.com:9443/ws/!ticker@arr");
 
       this.socket.onmessage = (event) => {
-        const data = JSON.parse(event.data).data;
+        const data = JSON.parse(event.data);
         this.updateCoinPrices(data);
       };
 
       this.socket.onclose = () => {
-        console.log("WebSocket connection closed. Reconnecting...");
         setTimeout(this.connectSocket, 1000);
       };
 
