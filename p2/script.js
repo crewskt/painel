@@ -3,7 +3,6 @@ const detectDevTools = () => {
   const onKeyPress = (event) => {
     if (event.code === 'F12' || (event.ctrlKey && event.shiftKey && event.code === 'I')) {
       alert('Ferramentas de desenvolvimento estão bloqueadas.');
-      // Ações adicionais podem ser adicionadas aqui.
     }
   };
 
@@ -62,7 +61,7 @@ new Vue({
         longShortRatio: "Long/Short",
         volatility: "Volatility",
       };
-      return ` ${keyMap[this.sort.key]}`;
+      return keyMap[this.sort.key];
     },
     coinsList() {
       let sortedCoins = this.filteredCoins;
@@ -101,8 +100,6 @@ new Vue({
             percent: Number(d.priceChangePercent),
             assetVolume: Number(d.volume),
             trades: Number(d.count),
-            longShortRatio: Number(d.longShortRatio),
-            volatility: Number(d.volatility),
             history: [Number(d.lastPrice) * 0.95, Number(d.lastPrice) * 1.05, Number(d.lastPrice)],
             style: {
               gain: d.priceChange > 0,
@@ -113,7 +110,7 @@ new Vue({
           }));
         
         // Obter a última moeda listada
-        this.lastListedCoin = this.coins[this.coins.length - 1].symbol;
+        this.lastListedCoin = data[data.length - 1].symbol;
 
         this.loadLongShortRatios();
         this.status = 1;
@@ -170,61 +167,37 @@ new Vue({
       this.sort.key = key;
       this.sort.order = order;
     },
-    connectSocket() {
-      const url = "wss://fstream.binance.com/stream";
-      const stream = "!ticker@arr";
-      this.socket = new WebSocket(`${url}?streams=${stream}`);
-
-      this.socket.onopen = () => {
-        this.loaderVisible = false;
-        console.log("WebSocket connection opened.");
-      };
-
-      this.socket.onmessage = (event) => {
-        const data = JSON.parse(event.data).data;
-        this.updateCoinPrices(data);
-      };
-
-      this.socket.onclose = () => {
-        console.log("WebSocket connection closed. Reconnecting...");
-        setTimeout(this.connectSocket, 1000);
-      };
-
-      this.socket.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        this.socket.close();
-      };
-    },
-    updateCoinPrices(data) {
-      this.coins = this.coins.map(coin => {
-        const ticker = data.find(t => t.s === coin.symbol);
-        if (ticker) {
-          const newHistory = coin.history.slice(-29).concat(Number(ticker.c));
-          const volatility = ((ticker.h - ticker.l) / ticker.o) * 100; // Exemplo de cálculo de volatilidade
-          return {
-            ...coin,
-            close: Number(ticker.c),
-            change: Number(ticker.p),
-            percent: Number(ticker.P),
-            assetVolume: Number(ticker.q),
-            trades: Number(ticker.n),
-            history: newHistory,
-            volatility: volatility,
-          };
-        }
-        return coin;
-      });
-    },
     saveLSRToLocalStorage() {
-      const lsrData = JSON.stringify(this.longShortRatios);
-      localStorage.setItem("lsr", lsrData);
+      localStorage.setItem('longShortRatios', JSON.stringify(this.longShortRatios));
     },
     loadLSRFromLocalStorage() {
-      const lsrData = localStorage.getItem("lsr");
-      if (lsrData) {
-        this.longShortRatios = JSON.parse(lsrData);
+      const savedRatios = localStorage.getItem('longShortRatios');
+      if (savedRatios) {
+        this.longShortRatios = JSON.parse(savedRatios);
         this.updateCoinsWithRatios();
       }
+    },
+    connectSocket() {
+      this.socket = new WebSocket("wss://fstream.binance.com/ws/!ticker@arr");
+      this.socket.onmessage = this.onSocketMessage;
+      this.socket.onopen = () => console.log("Connected to the websocket");
+      this.socket.onclose = () => {
+        console.log("Disconnected from the websocket. Reconnecting...");
+        setTimeout(this.connectSocket, 1000);
+      };
+    },
+    onSocketMessage(event) {
+      const data = JSON.parse(event.data);
+      data.forEach(update => {
+        const coin = this.coins.find(c => c.symbol === update.s);
+        if (coin) {
+          coin.close = Number(update.c);
+          coin.change = Number(update.p);
+          coin.percent = Number(update.P);
+          coin.assetVolume = Number(update.q);
+          coin.trades = Number(update.n);
+        }
+      });
     },
   },
 });
