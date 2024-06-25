@@ -3,8 +3,9 @@ const detectDevTools = () => {
   const onKeyPress = (event) => {
     if (event.code === 'F12' || (event.ctrlKey && event.shiftKey && event.code === 'I')) {
       alert('Ferramentas de desenvolvimento estão bloqueadas.');
+      // Ações adicionais podem ser adicionadas aqui.
     }
-  };
+  }; 
 
   window.addEventListener('keydown', onKeyPress);
 };
@@ -19,10 +20,78 @@ Vue.filter("toFixed", (num, asset) => {
 });
 
 Vue.filter("toMoney", (num) => {
-  return Number(num).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  return Number(num)
+    .toFixed(0)
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 });
 
-// Adicionando a instância do Vue.js
+Vue.filter("formatVolume", (num) => {
+  if (num >= 1e9) {
+    return (num / 1e9).toFixed(3) + 'B';
+  } else if (num >= 1e6) {
+    return (num / 1e6).toFixed(3) + 'M';
+  } else if (num >= 1e3) {
+    return (num / 1e3).toFixed(3) + 'K';
+  } else {
+    return num.toFixed(3);
+  }
+});
+
+// Componente para criar gráfico de linha
+Vue.component("linechart", {
+  props: {
+    width: { type: Number, default: 400, required: true },
+    height: { type: Number, default: 40, required: true },
+    values: { type: Array, default: () => [], required: true },
+    volatility: { type: Number, default: 0, required: true },
+  },
+  template: `
+    <div>
+      <canvas :width="width" :height="height"></canvas>
+      <span v-if="volatility >= 5" style="margin-left: 10px;"></span>
+      <span v-else-if="volatility < 5" style="margin-left: 10px;"></span>
+    </div>
+  `,
+  watch: {
+    values: {
+      handler: 'renderChart',
+      deep: true,
+    }
+  },
+  mounted() {
+    this.renderChart();
+  },
+  methods: {
+    renderChart() {
+      const canvas = this.$el.querySelector('canvas');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, this.width, this.height);
+
+      const max = Math.max(...this.values);
+      const min = Math.min(...this.values);
+      const range = max - min || 1;
+      const scaledValues = this.values.map(val => ((val - min) / range) * this.height);
+
+      ctx.beginPath();
+      ctx.moveTo(0, this.height - scaledValues[0]);
+
+      scaledValues.forEach((val, index) => {
+        const x = (index / (scaledValues.length - 1)) * this.width;
+        const y = this.height - val;
+
+        // Definir cor da linha como verde
+        ctx.strokeStyle = "#33f702";
+
+        ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+    },
+  },
+});
+
 new Vue({
   el: "#app",
   data() {
@@ -60,8 +129,9 @@ new Vue({
         trades: "Trades",
         longShortRatio: "Long/Short",
         volatility: "Volatility",
+
       };
-      return keyMap[this.sort.key];
+      return ` ${keyMap[this.sort.key]}`;
     },
     coinsList() {
       let sortedCoins = this.filteredCoins;
@@ -110,7 +180,7 @@ new Vue({
           }));
         
         // Obter a última moeda listada
-        this.lastListedCoin = data[data.length - 1].symbol;
+        this.lastListedCoin = this.coins[this.coins.length - 1].symbol;
 
         this.loadLongShortRatios();
         this.status = 1;
@@ -133,7 +203,6 @@ new Vue({
             [symbol]: ratio,
           };
           this.updateCoinsWithRatios();
-          this.saveLSRToLocalStorage(); // Salvar no localStorage após a atualização
         } catch (error) {
           console.error(`Failed to load long/short ratio for ${symbol}:`, error);
           this.longShortRatios = {
@@ -167,37 +236,61 @@ new Vue({
       this.sort.key = key;
       this.sort.order = order;
     },
-    saveLSRToLocalStorage() {
-      localStorage.setItem('longShortRatios', JSON.stringify(this.longShortRatios));
-    },
-    loadLSRFromLocalStorage() {
-      const savedRatios = localStorage.getItem('longShortRatios');
-      if (savedRatios) {
-        this.longShortRatios = JSON.parse(savedRatios);
-        this.updateCoinsWithRatios();
-      }
-    },
     connectSocket() {
-      this.socket = new WebSocket("wss://fstream.binance.com/ws/!ticker@arr");
-      this.socket.onmessage = this.onSocketMessage;
-      this.socket.onopen = () => console.log("Connected to the websocket");
+      const url = "wss://fstream.binance.com/stream";
+      const stream = "!ticker@arr";
+      this.socket = new WebSocket(`${url}?streams=${stream}`);
+
+      this.socket.onopen = () => {
+        this.loaderVisible = false;
+        console.log("WebSocket connection opened.");
+      };
+
+      this.socket.onmessage = (event) => {
+        const data = JSON.parse(event.data).data;
+        this.updateCoinPrices(data);
+      };
+
       this.socket.onclose = () => {
-        console.log("Disconnected from the websocket. Reconnecting...");
+        console.log("WebSocket connection closed. Reconnecting...");
         setTimeout(this.connectSocket, 1000);
       };
+
+      this.socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        this.socket.close();
+      };
     },
-    onSocketMessage(event) {
-      const data = JSON.parse(event.data);
-      data.forEach(update => {
-        const coin = this.coins.find(c => c.symbol === update.s);
-        if (coin) {
-          coin.close = Number(update.c);
-          coin.change = Number(update.p);
-          coin.percent = Number(update.P);
-          coin.assetVolume = Number(update.q);
-          coin.trades = Number(update.n);
+    updateCoinPrices(data) {
+      this.coins = this.coins.map(coin => {
+        const ticker = data.find(t => t.s === coin.symbol);
+        if (ticker) {
+          const newHistory = coin.history.slice(-29).concat(Number(ticker.c));
+          const volatility = ((ticker.h - ticker.l) / ticker.o) * 100; // Exemplo de cálculo de volatilidade
+          return {
+            ...coin,
+            close: Number(ticker.c),
+            change: Number(ticker.p),
+            percent: Number(ticker.P),
+            assetVolume: Number(ticker.q),
+            trades: Number(ticker.n),
+            history: newHistory,
+            volatility: volatility,
+          };
         }
+        return coin;
       });
+    },
+    saveLSRToLocalStorage() {
+      const lsrData = JSON.stringify(this.longShortRatios);
+      localStorage.setItem("lsr", lsrData);
+    },
+    loadLSRFromLocalStorage() {
+      const lsrData = localStorage.getItem("lsr");
+      if (lsrData) {
+        this.longShortRatios = JSON.parse(lsrData);
+        this.updateCoinsWithRatios();
+      }
     },
   },
 });
