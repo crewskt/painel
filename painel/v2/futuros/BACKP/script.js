@@ -1,19 +1,13 @@
 // Função para detectar ferramentas de desenvolvimento
 const detectDevTools = () => {
   const onKeyPress = (event) => {
-    if (event.code === 'F12' || (event.ctrlKey && event.shiftKey && event.code === 'I') || (event.ctrlKey && event.shiftKey && event.code === 'C')) {
+    if (event.code === 'F12' || (event.ctrlKey && event.shiftKey && event.code === 'I')) {
       alert('Ferramentas de desenvolvimento estão bloqueadas.');
       // Ações adicionais podem ser adicionadas aqui.
     }
-  };
-
-  const onRightClick = (event) => {
-    event.preventDefault();
-    alert('Ferramentas de desenvolvimento estão bloqueadas.');
-  };
+  }; 
 
   window.addEventListener('keydown', onKeyPress);
-  window.addEventListener('contextmenu', onRightClick);
 };
 
 // Executar a detecção de ferramentas de desenvolvimento
@@ -43,10 +37,6 @@ Vue.filter("formatVolume", (num) => {
   }
 });
 
-Vue.filter("toPercent", (num) => {
-  return `${(num * 100).toFixed(2)}%`;
-});
-
 // Componente para criar gráfico de linha
 Vue.component("linechart", {
   props: {
@@ -54,8 +44,6 @@ Vue.component("linechart", {
     height: { type: Number, default: 40, required: true },
     values: { type: Array, default: () => [], required: true },
     volatility: { type: Number, default: 0, required: true },
-    lineColor: { type: String, default: '#33f702' },
-    lineWidth: { type: Number, default: 2 }
   },
   template: `
     <div>
@@ -93,9 +81,8 @@ Vue.component("linechart", {
         const x = (index / (scaledValues.length - 1)) * this.width;
         const y = this.height - val;
 
-        // Definir cor e espessura da linha
-        ctx.strokeStyle = this.lineColor;
-        ctx.lineWidth = this.lineWidth;
+        // Definir cor da linha como verde
+        ctx.strokeStyle = "#33f702";
 
         ctx.lineTo(x, y);
       });
@@ -123,8 +110,6 @@ new Vue({
       },
       socket: null,
       lastListedCoin: null, // Adicionando estado para última moeda listada
-      isDarkMode: false, // Estado para modo escuro
-      favoriteCoins: [], // Estado para moedas favoritas
     };
   },
   created() {
@@ -133,7 +118,6 @@ new Vue({
     this.loadLSRFromLocalStorage();
     this.loadLongShortRatios(); // Iniciar o carregamento dos ratios long/short
     setInterval(this.loadLongShortRatios, 300000); // Atualizar a cada 5 minutos
-    this.loadFavoriteCoins(); // Carregar moedas favoritas do localStorage
   },
   computed: {
     sortLabel() {
@@ -164,9 +148,6 @@ new Vue({
     filteredCoins() {
       return this.coins.filter(c => c.token.toLowerCase().includes(this.search.toLowerCase()));
     },
-    favoriteCoinsList() {
-      return this.coins.filter(c => this.favoriteCoins.includes(c.symbol));
-    }
   },
   methods: {
     async loadCoins() {
@@ -309,29 +290,6 @@ new Vue({
       if (lsrData) {
         this.longShortRatios = JSON.parse(lsrData);
         this.updateCoinsWithRatios();
-      }
-    },
-    toggleDarkMode() {
-      this.isDarkMode = !this.isDarkMode;
-      document.body.classList.toggle('dark-mode', this.isDarkMode);
-    },
-    addFavorite(symbol) {
-      if (!this.favoriteCoins.includes(symbol)) {
-        this.favoriteCoins.push(symbol);
-        this.saveFavoriteCoins();
-      }
-    },
-    removeFavorite(symbol) {
-      this.favoriteCoins = this.favoriteCoins.filter(fav => fav !== symbol);
-      this.saveFavoriteCoins();
-    },
-    saveFavoriteCoins() {
-      localStorage.setItem('favoriteCoins', JSON.stringify(this.favoriteCoins));
-    },
-    loadFavoriteCoins() {
-      const favData = localStorage.getItem('favoriteCoins');
-      if (favData) {
-        this.favoriteCoins = JSON.parse(favData);
       }
     },
   },
