@@ -18,6 +18,11 @@
     .telegram-float:hover {
       transform: scale(1.1);
     }
+    .latest-coin {
+      font-size: 14px;
+      margin-left: 20px;
+      color: #fff;
+    }
   </style>
 </head>
 
@@ -35,6 +40,8 @@
           <a class="logo-footer" href="javascript:location.reload(true)">
             <img src="./betafuturos.svg" width="200" height="100" alt="Beta Bot Futuros">
           </a>
+          <!-- Novo elemento para mostrar a última moeda listada -->
+          <div id="latest-coin" class="latest-coin">Última Moeda: {{ latestCoin }}</div>
         </div>
         <div class="flex-row flex-middle">
           <div class="dropdown">
