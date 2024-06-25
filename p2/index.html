@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="PT">
+<html lang="pt">
 <head>
   <meta charset="UTF-8" />
   <title>Futuros Binance - betabot.store</title>
@@ -124,6 +124,8 @@
     </div>
   </div>
 
+  <audio id="welcome-audio" src="https://betabot.store/p2/betain.mp3" preload="auto"></audio>
+
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
   <ins class="adsbygoogle"
        style="display:block"
@@ -134,6 +136,15 @@
 
   <script>
     (adsbygoogle = window.adsbygoogle || []).push({});
+
+    window.addEventListener('load', () => {
+      const audio = document.getElementById('welcome-audio');
+      audio.play();
+
+      setTimeout(() => {
+        audio.pause();
+      }, 2000);
+    });
   </script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
