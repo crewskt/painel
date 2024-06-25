@@ -109,7 +109,7 @@ new Vue({
         order: "asc",
       },
       socket: null,
-      lastListedCoin: null,  // Adicione esta linha
+      lastListedCoin: null, // Adicionando estado para última moeda listada
     };
   },
   created() {
@@ -175,10 +175,9 @@ new Vue({
             longShortRatio: null,
             volatility: 0, // Inicialmente 0, você pode calcular isso conforme necessário
           }));
-
-        if (this.coins.length > 0) {
-          this.lastListedCoin = this.coins[this.coins.length - 1]; // Pegue a última moeda listada
-        }
+        
+        // Obter a última moeda listada
+        this.lastListedCoin = this.coins[this.coins.length - 1].symbol;
 
         this.loadLongShortRatios();
         this.status = 1;
