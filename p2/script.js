@@ -92,7 +92,8 @@ new Vue({
     this.loadCoins();
     this.connectSocket();
     this.loadLSRFromLocalStorage();
-    setInterval(this.saveLSRToLocalStorage, 300000);
+    this.loadLongShortRatios(); // Iniciar o carregamento dos ratios long/short
+    setInterval(this.loadLongShortRatios, 300000); // Atualizar a cada 5 minutos
   },
   computed: {
     sortLabel() {
@@ -158,24 +159,34 @@ new Vue({
     },
     async loadLongShortRatios() {
       const symbols = this.coins.map(c => c.symbol);
-      const longShortRatios = {};
-
+      
       const fetchLongShortRatio = async (symbol) => {
         try {
           const response = await fetch(`https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${symbol}&period=5m`);
           if (!response.ok) throw new Error('Failed to fetch');
           const data = await response.json();
-          longShortRatios[symbol] = data.length >= 30 ? Number(data[29].longShortRatio).toFixed(4) : 'N/A';
-          this.saveLSRToLocalStorage();
+          const ratio = data.length >= 30 ? Number(data[29].longShortRatio).toFixed(4) : 'N/A';
+          this.longShortRatios = {
+            ...this.longShortRatios,
+            [symbol]: ratio,
+          };
+          this.updateCoinsWithRatios();
         } catch (error) {
           console.error(`Failed to load long/short ratio for ${symbol}:`, error);
-          longShortRatios[symbol] = 'N/A';
+          this.longShortRatios = {
+            ...this.longShortRatios,
+            [symbol]: 'N/A',
+          };
         }
       };
 
+      // Initial fetch
       await Promise.all(symbols.map(symbol => fetchLongShortRatio(symbol)));
-      this.longShortRatios = longShortRatios;
-      this.updateCoinsWithRatios();
+
+      // Set interval to update every 5 minutes
+      setInterval(async () => {
+        await Promise.all(symbols.map(symbol => fetchLongShortRatio(symbol)));
+      }, 300000); // 5 minutes in milliseconds
     },
     updateCoinsWithRatios() {
       this.coins = this.coins.map(coin => ({
