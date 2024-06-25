@@ -145,7 +145,6 @@ new Vue({
         trades: "Trades",
         longShortRatio: "Long/Short",
         volatility: "Volatility",
-
       };
       return ` ${keyMap[this.sort.key]}`;
     },
@@ -199,7 +198,8 @@ new Vue({
           }));
         
         // Obter a última moeda listada
-        this.lastListedCoin = this.coins[this.coins.length - 1].symbol;
+        const lastCoin = data.find(d => d.symbol.endsWith("USDT"));
+        this.lastListedCoin = lastCoin ? lastCoin.symbol.replace("USDT", "") : null;
 
         this.loadLongShortRatios();
         this.status = 1;
@@ -336,3 +336,4 @@ new Vue({
     },
   },
 });
+

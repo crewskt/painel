@@ -33,9 +33,15 @@
         </div>
         <div class="text-primary if-medium">
           <a class="logo-footer" href="javascript:location.reload(true)">
-            <img src="./betafuturos.svg" width="200" height="100" alt="Beta Bot Futuros">
+            <img src="./betafuturos.svg" width="200" height="100" alt="Beta Bot Futuros">              <span class="last-listed"></span>
           </a>
-        </div>
+
+                Última moeda listada: {{ lastListedCoin }}
+              </span>
+
+          </div>
+          
+
         <div class="flex-row flex-middle">
           <div class="dropdown">
             <div class="form-input text-nowrap shadow-box">▼ {{ limit }}</div>

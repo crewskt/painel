@@ -399,6 +399,7 @@ input, button, select, option, textarea {
 }
 
 /* Loader */
+
 .loader-wrap {
   display: none;
   flex-direction: row;
@@ -416,6 +417,9 @@ input, button, select, option, textarea {
 .loader-wrap.visible {
   display: flex;
 }
+
+
+
 
 .loader-wrap .loader-content {
   padding: 1em 2em;
