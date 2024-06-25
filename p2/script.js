@@ -45,13 +45,13 @@ Vue.component("linechart", {
     values: { type: Array, default: () => [], required: true },
     volatility: { type: Number, default: 0, required: true },
   },
-  template: 
+  template: `
     <div>
       <canvas :width="width" :height="height"></canvas>
       <span v-if="volatility >= 5" style="margin-left: 10px;"></span>
       <span v-else-if="volatility < 5" style="margin-left: 10px;"></span>
     </div>
-  ,
+  `,
   watch: {
     values: {
       handler: 'renderChart',
@@ -127,7 +127,7 @@ new Vue({
         percent: "Percent",
         trades: "Trades",
       };
-      return Ord: ${keyMap[this.sort.key]};
+      return `Ord: ${keyMap[this.sort.key]}`;
     },
     coinsList() {
       let sortedCoins = this.filteredCoins;
@@ -157,7 +157,7 @@ new Vue({
             pair: d.symbol,
             token: d.symbol.replace("USDT", ""),
             asset: "USDT",
-            icon: https://betabot.store/icons/${d.symbol.replace("USDT", "").toLowerCase()}.png,
+            icon: `https://betabot.store/icons/${d.symbol.replace("USDT", "").toLowerCase()}.png`,
             close: Number(d.lastPrice),
             open: Number(d.openPrice),
             high: Number(d.highPrice),
@@ -186,7 +186,7 @@ new Vue({
       
       const fetchLongShortRatio = async (symbol) => {
         try {
-          const response = await fetch(https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${symbol}&period=5m);
+          const response = await fetch(`https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${symbol}&period=5m`);
           if (!response.ok) throw new Error('Failed to fetch');
           const data = await response.json();
           const ratio = data.length >= 30 ? Number(data[29].longShortRatio).toFixed(4) : 'N/A';
@@ -196,7 +196,7 @@ new Vue({
           };
           this.updateCoinsWithRatios();
         } catch (error) {
-          console.error(Failed to load long/short ratio for ${symbol}:, error);
+          console.error(`Failed to load long/short ratio for ${symbol}:`, error);
           this.longShortRatios = {
             ...this.longShortRatios,
             [symbol]: 'N/A',
@@ -231,7 +231,7 @@ new Vue({
     connectSocket() {
       const url = "wss://fstream.binance.com/stream";
       const stream = "!ticker@arr";
-      this.socket = new WebSocket(${url}?streams=${stream});
+      this.socket = new WebSocket(`${url}?streams=${stream}`);
 
       this.socket.onopen = () => {
         this.loaderVisible = false;
