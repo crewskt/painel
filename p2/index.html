@@ -5,27 +5,24 @@
   <title>Futuros Binance - betabot.store</title>
   <link rel="stylesheet" href="https://betabot.store/p2/style.css" />
   <link rel="shortcut icon" href="https://betabot.store/beta.ico" />
-  <style> 
-    /* Estilo para o ícone do Telegram flutuante */
+  <style>
     .telegram-float {
       position: fixed;
-      bottom: 20px; /* Ajuste a posição vertical conforme necessário */
-      right: 20px; /* Ajuste a posição horizontal conforme necessário */
-      z-index: 1000; /* Garante que o ícone esteja sempre visível */
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
       cursor: pointer;
       transition: transform 0.20s ease-in-out;
     }
     
     .telegram-float:hover {
-      transform: scale(1.1); /* Efeito de escala ao passar o mouse */
+      transform: scale(1.1);
     }
   </style>
 </head>
 
 <body>
-  <!-- vue root -->
   <div id="app" v-cloak>
-    <!-- fixed header -->
     <header class="header-wrap">
       <div class="header-row flex-row flex-middle flex-space">
         <div class="if-small">
@@ -73,7 +70,6 @@
       </div>
     </header>
 
-    <!-- price list grid -->
     <main class="main-wrap">
       <div class="main-grid-list">
         <div class="main-grid-item" v-for="c in coinsList" :key="c.symbol" :class="c.style">
@@ -90,7 +86,6 @@
                   <h2 class="text-bright text-clip">
                     {{ c.close | toFixed(asset) }}
                   </h2>
-                  <!-- Display Long Short Ratio -->
                   <div class="text-clip">
                     Long Short Ratio: {{ c.longShortRatio }}
                   </div>
@@ -106,7 +101,7 @@
                     {{ c.assetVolume | toMoney }} <small class="text-faded">Vol</small>
                   </div>
                   <div class="text-clip">
-                    Volat: {{ c.volatility | toFixed(2) }}% <!-- Mostra a volatilidade -->
+                    Volat: {{ c.volatility | toFixed(2) }}%
                     <span v-if="c.volatility >= 15">🔥</span>
                     <span v-else>❄️</span>
                   </div>
@@ -115,13 +110,12 @@
             </div>
           </div>
           <div class="main-grid-chart">
-            <linechart :width="400" :height="40" :values="c.history" :volatility="c.volatility"></linechart>
+            <linechart :width="380" :height="40" :values="c.history" :volatility="c.volatility"></linechart>
           </div>
         </div>
       </div>
     </main>
 
-    <!-- socket loader -->
     <div class="loader-wrap" :class="{ 'visible': loaderVisible }">
       <img src="https://betabot.store/painel.gif" alt="Beta Bot" v-if="status !== 3" class="loading" style="width: 350px; height: 350px;">
       <div v-if="status === 0"></div>
@@ -130,7 +124,6 @@
     </div>
   </div>
 
-  <!-- Google AdSense Code -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
   <ins class="adsbygoogle"
        style="display:block"
@@ -141,7 +134,6 @@
     (adsbygoogle = window.adsbygoogle || []).push({});
   </script>
 
-  <!-- Vue.js and other scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
   <script src="https://betabot.store/p2/script.js"></script>
 
