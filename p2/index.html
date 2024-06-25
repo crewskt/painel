@@ -14,13 +14,12 @@
       cursor: pointer;
       transition: transform 0.20s ease-in-out;
     }
-    
+
     .telegram-float:hover {
       transform: scale(1.1);
     }
   </style>
 </head>
-
 <body>
   <div id="app" v-cloak>
     <header class="header-wrap">
@@ -35,13 +34,9 @@
           <a class="logo-footer" href="javascript:location.reload(true)">
             <img src="./betafuturos.svg" width="200" height="100" alt="Beta Bot Futuros">
           </a>
-  <div v-if="lastListedCoin">
-    <h3>Última moeda listada: {{ lastListedCoin }}</h3>
-  </div>
-</div>
-
-
-        
+          <!-- Adicionando um elemento para mostrar a última moeda listada -->
+          <span v-if="lastListedCoin" class="last-listed-coin">Última moeda listada: {{ lastListedCoin }}</span>
+        </div>
         <div class="flex-row flex-middle">
           <div class="dropdown">
             <div class="form-input text-nowrap shadow-box">▼ {{ limit }}</div>
@@ -76,7 +71,6 @@
         </div>
       </div>
     </header>
-
     <main class="main-wrap">
       <div class="main-grid-list">
         <div class="main-grid-item" v-for="c in coinsList" :key="c.symbol" :class="c.style">
@@ -137,6 +131,8 @@
        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
        data-ad-slot="XXXXXXXXXX"
        data-ad-format="auto"></ins>
+ 
+
   <script>
     (adsbygoogle = window.adsbygoogle || []).push({});
   </script>
@@ -151,4 +147,3 @@
      crossorigin="anonymous"></script>
 </body>
 </html>
- 
