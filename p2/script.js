@@ -45,12 +45,13 @@ Vue.component("linechart", {
     values: { type: Array, default: () => [], required: true },
     volatility: { type: Number, default: 0, required: true },
   },
-  template: 
-    `<div>
+  template: `
+    <div>
       <canvas :width="width" :height="height"></canvas>
       <span v-if="volatility >= 5" style="margin-left: 10px;"></span>
       <span v-else-if="volatility < 5" style="margin-left: 10px;"></span>
-    </div>`,
+    </div>
+  `,
   watch: {
     values: {
       handler: 'renderChart',
@@ -108,7 +109,6 @@ new Vue({
         order: "asc",
       },
       socket: null,
-      lastCoin: null, // Nova variável para armazenar a última moeda listada
     };
   },
   created() {
@@ -174,8 +174,6 @@ new Vue({
             longShortRatio: null,
             volatility: 0, // Inicialmente 0, você pode calcular isso conforme necessário
           }));
-        // Definir a última moeda listada
-        this.lastCoin = this.coins[this.coins.length - 1];
         this.loadLongShortRatios();
         this.status = 1;
       } catch (error) {
