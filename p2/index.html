@@ -5,26 +5,24 @@
   <title>Futuros Binance - betabot.store</title>
   <link rel="stylesheet" href="https://betabot.store/p2/style.css" />
   <link rel="shortcut icon" href="https://betabot.store/beta.ico" />
+  <style> 
+    /* Estilo para o ícone do Telegram flutuante */
+    .telegram-float {
+      position: fixed;
+      bottom: 20px; /* Ajuste a posição vertical conforme necessário */
+      right: 20px; /* Ajuste a posição horizontal conforme necessário */
+      z-index: 1000; /* Garante que o ícone esteja sempre visível */
+      cursor: pointer;
+      transition: transform 0.20s ease-in-out;
+    }
+    
+    .telegram-float:hover {
+      transform: scale(1.1); /* Efeito de escala ao passar o mouse */
+    }
+  </style>
 </head>
 
-<style> 
-  /* Estilo para o ícone do Telegram flutuante */
-  .telegram-float {
-    position: fixed;
-    bottom: 20px; /* Ajuste a posição vertical conforme necessário */
-    right: 20px; /* Ajuste a posição horizontal conforme necessário */
-    z-index: 1000; /* Garante que o ícone esteja sempre visível */
-    cursor: pointer;
-    transition: transform 0.20s ease-in-out;
-  }
-  
-  .telegram-float:hover {
-    transform: scale(1.1); /* Efeito de escala ao passar o mouse */
-  }
-</style>
-
 <body>
-  <!-- partial:index.partial.html -->
   <!-- vue root -->
   <div id="app" v-cloak>
     <!-- fixed header -->
@@ -62,10 +60,6 @@
               <li @click="sortBy('percent', 'desc')"><span class="text-faded">Ord:</span> Percent</li>
               <li @click="sortBy('trades', 'desc')"><span class="text-faded">Ord:</span> Trades</li>
               <li @click="sortBy('longShortRatio', 'asc')"><span class="text-faded">Ord:</span> Long/Short</li>
-            </ul>
-
-              
-
             </ul>
           </div>
           <div class="dropdown">
@@ -111,12 +105,17 @@
                   <div class="text-clip">
                     {{ c.assetVolume | toMoney }} <small class="text-faded">Vol</small>
                   </div>
+                  <div class="text-clip">
+                    Volatility: {{ c.volatility | toFixed(2) }}% <!-- Mostra a volatilidade -->
+                    <span v-if="c.volatility >= 5">🔥</span>
+                    <span v-else>❄️</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="main-grid-chart">
-            <linechart :width="400" :height="40" :values="c.history"></linechart>
+            <linechart :width="400" :height="40" :values="c.history" :volatility="c.volatility"></linechart>
           </div>
         </div>
       </div>
