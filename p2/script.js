@@ -115,8 +115,8 @@ new Vue({
     this.loadCoins();
     this.connectSocket();
     this.loadLSRFromLocalStorage();
-    this.loadLatestCoin();
-    setInterval(this.loadLatestCoin, 3600000); // Atualiza a cada 1 hora (3600000 ms)
+    this.loadLastListedCoin(); // Load last listed coin on initialization
+    setInterval(this.loadLastListedCoin, 3600000); // Update every 1 hour (3600000 ms)
   },
   computed: {
     sortLabel() {
@@ -186,7 +186,7 @@ new Vue({
         this.status = -1;
       }
     },
-    async loadLatestCoin() {
+    async loadLastListedCoin() {
       try {
         const response = await fetch("https://fapi.binance.com/fapi/v1/exchangeInfo");
         const data = await response.json();
@@ -200,6 +200,9 @@ new Vue({
         if (latestCoin) {
           this.latestCoin = latestCoin;
           document.getElementById('latest-coin').innerHTML = `Última moeda listada: ${this.latestCoin.token}`;
+
+          // Save latest coin to local storage
+          localStorage.setItem("latestCoin", JSON.stringify(this.latestCoin));
         }
       } catch (error) {
         console.error("Failed to load latest coin:", error);
@@ -222,94 +225,124 @@ new Vue({
         } catch (error) {
           console.error(`Failed to load long/short ratio for ${symbol}:`, error);
           this.longShortRatios = {
-            ...this.longShortRatios,
-            [symbol]: 'N/A',
-          };
-        }
-      };
-
-      for (const symbol of symbols) {
-        await fetchLongShortRatio(symbol);
+            ...this.longShortRat          [symbol]: 'N/A',
+        };
       }
-    },
-    updateCoinsWithRatios() {
-              this.coins = this.coins.map(coin => ({
-          ...coin,
-          longShortRatio: this.longShortRatios[coin.symbol] || 'N/A',
-        }));
+    };
 
-        // Salvar no armazenamento local
-        this.saveLSRToLocalStorage();
-      },
-      connectSocket() {
-        const socket = new WebSocket("wss://fstream.binance.com/ws/!ticker@arr");
-        this.socket = socket;
+    for (const symbol of symbols) {
+      await fetchLongShortRatio(symbol);
+    }
+  },
+  updateCoinsWithRatios() {
+    this.coins = this.coins.map(coin => ({
+      ...coin,
+      longShortRatio: this.longShortRatios[coin.symbol] || 'N/A',
+    }));
 
-        socket.onopen = () => {
-          console.log("Socket connected");
+    // Save to local storage
+    this.saveLSRToLocalStorage();
+  },
+  connectSocket() {
+    const socket = new WebSocket("wss://fstream.binance.com/ws/!ticker@arr");
+    this.socket = socket;
+
+    socket.onopen = () => {
+      console.log("Socket connected");
+    };
+
+    socket.onerror = (error) => {
+      console.error("Socket error:", error);
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const tickers = JSON.parse(event.data);
+        this.updateCoinsFromSocket(tickers);
+      } catch (error) {
+        console.error("Error parsing message from socket:", error);
+      }
+    };
+
+    socket.onclose = () => {
+      console.log("Socket closed, reconnecting...");
+      setTimeout(() => {
+        this.connectSocket();
+      }, 5000);
+    };
+  },
+  updateCoinsFromSocket(tickers) {
+    tickers.forEach(ticker => {
+      const symbol = ticker.s;
+      const coinIndex = this.coins.findIndex(c => c.symbol === symbol);
+      if (coinIndex !== -1) {
+        const coin = this.coins[coinIndex];
+        coin.close = parseFloat(ticker.c);
+        coin.open = parseFloat(ticker.o);
+        coin.high = parseFloat(ticker.h);
+        coin.low = parseFloat(ticker.l);
+        coin.change = parseFloat(ticker.p);
+        coin.percent = parseFloat(ticker.P);
+        coin.assetVolume = parseFloat(ticker.q);
+        coin.trades = parseInt(ticker.n);
+        coin.style = {
+          gain: coin.change > 0,
+          loss: coin.change < 0,
         };
+        this.$set(this.coins, coinIndex, coin);
+      }
+    });
+  },
+  saveLSRToLocalStorage() {
+    localStorage.setItem("longShortRatios", JSON.stringify(this.longShortRatios));
+  },
+  loadLSRFromLocalStorage() {
+    const storedLSR = localStorage.getItem("longShortRatios");
+    if (storedLSR) {
+      this.longShortRatios = JSON.parse(storedLSR);
+      this.updateCoinsWithRatios();
+    }
+  },
+  loadLastListedCoin() {
+    const storedCoin = localStorage.getItem("latestCoin");
+    if (storedCoin) {
+      this.latestCoin = JSON.parse(storedCoin);
+      document.getElementById('latest-coin').innerHTML = `Última moeda listada: ${this.latestCoin.token}`;
+    } else {
+      this.fetchAndSaveLatestCoin();
+    }
+  },
+  async fetchAndSaveLatestCoin() {
+    try {
+      const response = await fetch("https://fapi.binance.com/fapi/v1/exchangeInfo");
+      const data = await response.json();
+      const symbols = data.symbols;
 
-        socket.onerror = (error) => {
-          console.error("Socket error:", error);
-        };
+      // Ordenar por data de listagem e pegar a última
+      symbols.sort((a, b) => new Date(b.onboardDate) - new Date(a.onboardDate));
+      const latestSymbol = symbols[0].symbol;
+      const latestCoin = this.coins.find(c => c.symbol === latestSymbol);
 
-        socket.onmessage = (event) => {
-          try {
-            const tickers = JSON.parse(event.data);
-            this.updateCoinsFromSocket(tickers);
-          } catch (error) {
-            console.error("Error parsing message from socket:", error);
-          }
-        };
+      if (latestCoin) {
+        this.latestCoin = latestCoin;
+        document.getElementById('latest-coin').innerHTML = `Última moeda listada: ${this.latestCoin.token}`;
 
-        socket.onclose = () => {
-          console.log("Socket closed, reconnecting...");
-          setTimeout(() => {
-            this.connectSocket();
-          }, 5000);
-        };
-      },
-      updateCoinsFromSocket(tickers) {
-        tickers.forEach(ticker => {
-          const symbol = ticker.s;
-          const coinIndex = this.coins.findIndex(c => c.symbol === symbol);
-          if (coinIndex !== -1) {
-            const coin = this.coins[coinIndex];
-            coin.close = parseFloat(ticker.c);
-            coin.open = parseFloat(ticker.o);
-            coin.high = parseFloat(ticker.h);
-            coin.low = parseFloat(ticker.l);
-            coin.change = parseFloat(ticker.p);
-            coin.percent = parseFloat(ticker.P);
-            coin.assetVolume = parseFloat(ticker.q);
-            coin.trades = parseInt(ticker.n);
-            coin.style = {
-              gain: coin.change > 0,
-              loss: coin.change < 0,
-            };
-            this.$set(this.coins, coinIndex, coin);
-          }
-        });
-      },
-      saveLSRToLocalStorage() {
-        localStorage.setItem("longShortRatios", JSON.stringify(this.longShortRatios));
-      },
-      loadLSRFromLocalStorage() {
-        const storedLSR = localStorage.getItem("longShortRatios");
-        if (storedLSR) {
-          this.longShortRatios = JSON.parse(storedLSR);
-          this.updateCoinsWithRatios();
-        }
-      },
-      sortCoins(key) {
-        if (this.sort.key === key) {
-          this.sort.order = this.sort.order === 'asc' ? 'desc' : 'asc';
-        } else {
-          this.sort.key = key;
-          this.sort.order = 'asc';
-        }
-      },
-    },
-  });
+        // Save latest coin to local storage
+        localStorage.setItem("latestCoin", JSON.stringify(this.latestCoin));
+      }
+    } catch (error) {
+      console.error("Failed to load latest coin:", error);
+    }
+  },
+  sortCoins(key) {
+    if (this.sort.key === key) {
+      this.sort.order = this.sort.order === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sort.key = key;
+      this.sort.order = 'asc';
+    }
+  },
+},
+});
 
 
