@@ -225,7 +225,8 @@ new Vue({
         } catch (error) {
           console.error(`Failed to load long/short ratio for ${symbol}:`, error);
           this.longShortRatios = {
-            ...this.longShortRat          [symbol]: 'N/A',
+            ...this.longShortRat,
+            [symbol]: 'N/A',
         };
       }
     };
