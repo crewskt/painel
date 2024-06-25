@@ -31,8 +31,15 @@ Vue.component("linechart", {
     width: { type: Number, default: 400, required: true },
     height: { type: Number, default: 40, required: true },
     values: { type: Array, default: () => [], required: true },
+    volatility: { type: Number, default: 0, required: true },
   },
-  template: '<canvas :width="width" :height="height"></canvas>',
+  template: `
+    <div>
+      <canvas :width="width" :height="height"></canvas>
+      <span v-if="volatility >= 5" style="margin-left: 10px;">🔥</span>
+      <span v-else-if="volatility < 5" style="margin-left: 10px;">❄️</span>
+    </div>
+  `,
   watch: {
     values: {
       handler: 'renderChart',
@@ -44,9 +51,10 @@ Vue.component("linechart", {
   },
   methods: {
     renderChart() {
-      const canvas = this.$el;
-      const ctx = canvas.getContext("2d");
+      const canvas = this.$el.querySelector('canvas');
+      if (!canvas) return;
 
+      const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, this.width, this.height);
 
       const max = Math.max(...this.values);
@@ -149,6 +157,7 @@ new Vue({
               loss: d.priceChange < 0,
             },
             longShortRatio: null,
+            volatility: 0, // Inicialmente 0, você pode calcular isso conforme necessário
           }));
         this.loadLongShortRatios();
         this.status = 1;
@@ -234,6 +243,7 @@ new Vue({
         const ticker = data.find(t => t.s === coin.symbol);
         if (ticker) {
           const newHistory = coin.history.slice(-29).concat(Number(ticker.c));
+          const volatility = ((ticker.h - ticker.l) / ticker.o) * 100; // Exemplo de cálculo de volatilidade
           return {
             ...coin,
             close: Number(ticker.c),
@@ -242,6 +252,7 @@ new Vue({
             assetVolume: Number(ticker.q),
             trades: Number(ticker.n),
             history: newHistory,
+            volatility: volatility,
           };
         }
         return coin;
