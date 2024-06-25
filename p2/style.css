@@ -114,7 +114,7 @@ new Vue({
   methods: {
     loadCoins() {
       // Código para carregar moedas, incluindo definição da última moeda listada
-      fetch('API_URL') // Substitua 'API_URL' com o endpoint real
+      fetch('https://fapi.binance.com/fapi/v1/exchangeInfo') // Substitua 'API_URL' com o endpoint real
         .then(response => response.json())
         .then(data => {
           this.coins = data.coins;
