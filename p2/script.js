@@ -174,12 +174,33 @@ new Vue({
             longShortRatio: null,
             volatility: 0, // Inicialmente 0, você pode calcular isso conforme necessário
           }));
-        this.latestCoin = this.coins[0]; // Assumindo que a moeda mais recente é a primeira da lista
-        this.loadLongShortRatios();
         this.status = 1;
+
+        // Obter a última moeda listada
+        await this.loadLatestCoin();
+
+        this.loadLongShortRatios();
       } catch (error) {
         console.error("Failed to load coins:", error);
         this.status = -1;
+      }
+    },
+    async loadLatestCoin() {
+      try {
+        const response = await fetch("https://fapi.binance.com/fapi/v1/exchangeInfo");
+        const data = await response.json();
+        const symbols = data.symbols;
+
+        // Ordenar por data de listagem e pegar a última
+        symbols.sort((a, b) => new Date(b.onboardDate) - new Date(a.onboardDate));
+        const latestSymbol = symbols[0].symbol;
+        const latestCoin = this.coins.find(c => c.symbol === latestSymbol);
+
+        if (latestCoin) {
+          this.latestCoin = latestCoin;
+        }
+      } catch (error) {
+        console.error("Failed to load latest coin:", error);
       }
     },
     async loadLongShortRatios() {
@@ -216,28 +237,11 @@ new Vue({
     updateCoinsWithRatios() {
       this.coins = this.coins.map(coin => ({
         ...coin,
-        longShortRatio: this.longShortRatios[coin.symbol] || 'N/A',
+        longShortRatio: this.longShortRatios[coin.symbol],
       }));
     },
-    setLimit(limit) {
-      this.limit = limit;
-    },
-    filterAsset(asset) {
-      this.asset = asset;
-    },
-    sortBy(key, order) {
-      this.sort.key = key;
-      this.sort.order = order;
-    },
     connectSocket() {
-      const url = "wss://fstream.binance.com/stream";
-      const stream = "!ticker@arr";
-      this.socket = new WebSocket(`${url}?streams=${stream}`);
-
-      this.socket.onopen = () => {
-        this.loaderVisible = false;
-        console.log("WebSocket connection opened.");
-      };
+      this.socket = new WebSocket("wss://fstream.binance.com/stream?streams=!ticker@arr");
 
       this.socket.onmessage = (event) => {
         const data = JSON.parse(event.data).data;
