@@ -23,6 +23,22 @@
       font-size: 1.2em;
       font-weight: bold;
       color: #FFD700;
+      animation: slide 1s ease-in-out infinite; /* Ajustando a animação para 7 segundos */
+      white-space: nowrap;
+    }
+
+    @keyframes slide {
+      50% {
+        transform: translateX(30%); /* Movendo de 50% da largura para a esquerda */
+      }
+      50% {
+        transform: translateX(-20%); /* Movendo de 50% da largura para a direita */
+      }
+    }
+
+    .logo-footer {
+      display: flex;
+      align-items: center;
     }
   </style>
 </head>
@@ -37,11 +53,10 @@
           </div>
         </div>
         <div class="text-primary if-medium">
-          <a class="logo-footer" href="javascript:location.reload(true)">
-            <img src="./betafuturos.svg" width="200" height="80" alt="Beta Bot Futuros">
+          <a class="logo-footer" >
+            <img src="./betafuturos.svg" width="200" height="200" alt="Beta Bot Futuros">
+            <span v-if="lastListedCoin" class="last-listed-coin">Último Token Listado: {{ lastListedCoin }}</span>
           </a>
-          <!-- Adicionando um elemento para mostrar a última moeda listada -->
-          <span v-if="lastListedCoin" class="last-listed-coin">Última moeda listada: {{ lastListedCoin }}</span>
         </div>
         <div class="flex-row flex-middle">
           <div class="dropdown">
