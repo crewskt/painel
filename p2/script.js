@@ -69,8 +69,8 @@ Vue.component("linechart", {
         const x = (index / (scaledValues.length - 1)) * this.width;
         const y = this.height - val;
 
-        // Definir cor da linha com base na volatilidade
-        ctx.strokeStyle = this.volatility >= 3 ? "green" : "#7f8fa4";
+        // Definir cor da linha como verde
+        ctx.strokeStyle = "#33f702";
 
         ctx.lineTo(x, y);
       });
