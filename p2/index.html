@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="PT">
 <head>
   <meta charset="UTF-8" />
   <title>Futuros Binance - betabot.store</title>
@@ -33,7 +33,7 @@
         </div>
         <div class="text-primary if-medium">
           <a class="logo-footer" href="javascript:location.reload(true)">
-            <img src="./betafuturos.svg" width="200" height="80" alt="Beta Bot Futuros">
+            <img src="./betafuturos.svg" width="200" height="100" alt="Beta Bot Futuros">
           </a>
         </div>
         <div class="flex-row flex-middle">
@@ -117,22 +117,14 @@
       </div>
     </main>
 
-<div class="loader-wrap" :class="{ 'visible': loaderVisible }">
-  <img src="https://betabot.store/painel.gif" alt="Beta Bot" v-if="status !== 3" class="loading" style="width: 350px; height: 350px;">
-  <div v-if="status === 0"></div>
-  <div v-if="status === 1"></div>
-  <div v-if="status === 2">SEJA BEM-VINDO!</div>
-</div>
-
-
-    <!-- Latest Coin Display -->
-    <div id="latest-coin"></div>
+    <div class="loader-wrap" :class="{ 'visible': loaderVisible }">
+      <img src="https://betabot.store/painel.gif" alt="Beta Bot" v-if="status !== 3" class="loading" style="width: 350px; height: 350px;">
+      <div v-if="status === 0"></div>
+      <div v-if="status === 1"></div>
+      <div v-if="status === 2">SEJA BEM-VINDO!</div>
+    </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
-  <script src="https://betabot.store/p2/script.js"></script>
-
-  <!-- Google AdSense Script -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
   <ins class="adsbygoogle"
        style="display:block"
@@ -143,13 +135,13 @@
     (adsbygoogle = window.adsbygoogle || []).push({});
   </script>
 
-  <!-- Google Analytics Script -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8851688708766894"
-     crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
+  <script src="https://betabot.store/p2/script.js"></script>
 
-  <!-- Telegram Floating Button -->
   <a href="https://t.me/BETABOTROMPIMENTO" target="_blank" class="telegram-float">
     <img src="https://betabot.store/rastreador/telegram.png" alt="Telegram Icon" style="width: 50px; height: 50px;">
   </a>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8851688708766894"
+     crossorigin="anonymous"></script>
 </body>
 </html>
