@@ -124,7 +124,7 @@
     </div>
   </div>
 
-  <audio id="welcome-audio" src="https://betabot.store/p2/betain.mp3" preload="auto"></audio>
+  <audio id="welcome-audio" src="https://betabot.store/p2/betain.mp3" preload="auto" muted></audio>
 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
   <ins class="adsbygoogle"
@@ -140,6 +140,7 @@
     window.addEventListener('load', () => {
       const audio = document.getElementById('welcome-audio');
       audio.play();
+      audio.muted = false; // Unmute the audio once it starts playing
 
       setTimeout(() => {
         audio.pause();
