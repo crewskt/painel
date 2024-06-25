@@ -122,7 +122,7 @@ new Vue({
         order: "asc",
       },
       socket: null,
-      lastListedCoin: null, // Adicionando estado para última moeda listada
+      lastListedCoin: null, // Estado para a última moeda listada
       isDarkMode: false, // Estado para modo escuro
       favoriteCoins: [], // Estado para moedas favoritas
     };
@@ -198,14 +198,24 @@ new Vue({
           }));
         
         // Obter a última moeda listada
-        const lastCoin = data.find(d => d.symbol.endsWith("USDT"));
-        this.lastListedCoin = lastCoin ? lastCoin.symbol.replace("USDT", "") : null;
+        await this.loadLastListedCoin();
 
         this.loadLongShortRatios();
         this.status = 1;
       } catch (error) {
         console.error("Failed to load coins:", error);
         this.status = -1;
+      }
+    },
+    async loadLastListedCoin() {
+      try {
+        const response = await fetch("https://fapi.binance.com/fapi/v1/exchangeInfo");
+        const data = await response.json();
+        const symbols = data.symbols.filter(s => s.contractType === "PERPETUAL" && s.symbol.endsWith("USDT"));
+        symbols.sort((a, b) => new Date(b.onboardDate) - new Date(a.onboardDate));
+        this.lastListedCoin = symbols[0].symbol.replace("USDT", "");
+      } catch (error) {
+        console.error("Failed to load last listed coin:", error);
       }
     },
     async loadLongShortRatios() {
@@ -313,27 +323,20 @@ new Vue({
     },
     toggleDarkMode() {
       this.isDarkMode = !this.isDarkMode;
-      document.body.classList.toggle('dark-mode', this.isDarkMode);
     },
-    addFavorite(symbol) {
-      if (!this.favoriteCoins.includes(symbol)) {
-        this.favoriteCoins.push(symbol);
-        this.saveFavoriteCoins();
+    toggleFavorite(coin) {
+      if (this.favoriteCoins.includes(coin.symbol)) {
+        this.favoriteCoins = this.favoriteCoins.filter(fav => fav !== coin.symbol);
+      } else {
+        this.favoriteCoins.push(coin.symbol);
       }
-    },
-    removeFavorite(symbol) {
-      this.favoriteCoins = this.favoriteCoins.filter(fav => fav !== symbol);
-      this.saveFavoriteCoins();
-    },
-    saveFavoriteCoins() {
-      localStorage.setItem('favoriteCoins', JSON.stringify(this.favoriteCoins));
+      localStorage.setItem("favoriteCoins", JSON.stringify(this.favoriteCoins));
     },
     loadFavoriteCoins() {
-      const favData = localStorage.getItem('favoriteCoins');
-      if (favData) {
-        this.favoriteCoins = JSON.parse(favData);
+      const favoriteCoins = localStorage.getItem("favoriteCoins");
+      if (favoriteCoins) {
+        this.favoriteCoins = JSON.parse(favoriteCoins);
       }
     },
   },
 });
-
