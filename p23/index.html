@@ -3,25 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <title>Futuros Binance - betabot.store</title>
-  <link rel="stylesheet" href="https://betabot.store/p2/style.css" />
+  <link rel="stylesheet" href="./style.css" />
   <link rel="shortcut icon" href="https://betabot.store/beta.ico" />
-  <style>
-    .telegram-float {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1000;
-      cursor: pointer;
-      transition: transform 0.20s ease-in-out;
-    }
-
-    .telegram-float:hover {
-      transform: scale(1.1);
-    }
-  </style>
 </head>
+
+<style>
+  /* Estilo para o ícone do Telegram flutuante */
+  .telegram-float {
+    position: fixed;
+    bottom: 20px; /* Ajuste a posição vertical conforme necessário */
+    right: 20px; /* Ajuste a posição horizontal conforme necessário */
+    z-index: 1000; /* Garante que o ícone esteja sempre visível */
+    cursor: pointer;
+    transition: transform 0.20s ease-in-out;
+  }
+  
+  .telegram-float:hover {
+    transform: scale(1.1); /* Efeito de escala ao passar o mouse */
+  }
+</style>
+
 <body>
+  <!-- partial:index.partial.html -->
+  <!-- vue root -->
   <div id="app" v-cloak>
+    <!-- fixed header -->
     <header class="header-wrap">
       <div class="header-row flex-row flex-middle flex-space">
         <div class="if-small">
@@ -32,10 +38,8 @@
         </div>
         <div class="text-primary if-medium">
           <a class="logo-footer" href="javascript:location.reload(true)">
-            <img src="./betafuturos.svg" width="200" height="100" alt="Beta Bot Futuros">
+            <img src="./betafuturos.svg" width="200" height="100" alt="Descrição da Imagem">
           </a>
-          <!-- Adicionando um elemento para mostrar a última moeda listada -->
-           <!--<span v-if="lastListedCoin" class="last-listed-coin">Última moeda listada: {{ lastListedCoin }}</span>-->
         </div>
         <div class="flex-row flex-middle">
           <div class="dropdown">
@@ -52,24 +56,34 @@
           <div class="dropdown">
             <div class="form-input text-nowrap shadow-box">▼ {{ sortLabel }}</div>
             <ul>
-              <li @click="sortBy('token', 'asc')"><span class="text-faded"></span> Token</li>
-              <li @click="sortBy('close', 'desc')"><span class="text-faded"></span> Price</li>
-              <li @click="sortBy('assetVolume', 'desc')"><span class="text-faded"></span> Volume</li>
-              <li @click="sortBy('percent', 'desc')"><span class="text-faded"></span> Percent</li>
-              <li @click="sortBy('trades', 'desc')"><span class="text-faded"></span> Trades</li>
-              <li @click="sortBy('longShortRatio', 'asc')"><span class="text-faded"></span> Long/Short</li>
-              <li @click="sortBy('volatility', 'desc')"><span class="text-faded"></span> Volatility</li>
+              <li @click="sortBy('token', 'asc')"><span class="text-faded">Ord:</span> Token (A-Z)</li>
+              <li @click="sortBy('token', 'desc')"><span class="text-faded">Ord:</span> Token (Z-A)</li>
+              <li @click="sortBy('close', 'asc')"><span class="text-faded">Ord:</span> Preço (Menor para Maior)</li>
+              <li @click="sortBy('close', 'desc')"><span class="text-faded">Ord:</span> Preço (Maior para Menor)</li>
+              <li @click="sortBy('assetVolume', 'asc')"><span class="text-faded">Ord:</span> Volume (Menor para Maior)</li>
+              <li @click="sortBy('assetVolume', 'desc')"><span class="text-faded">Ord:</span> Volume (Maior para Menor)</li>
+              <li @click="sortBy('percent', 'asc')"><span class="text-faded">Ord:</span> Percentual (Menor para Maior)</li>
+              <li @click="sortBy('percent', 'desc')"><span class="text-faded">Ord:</span> Percentual (Maior para Menor)</li>
+              <li @click="sortBy('trades', 'asc')"><span class="text-faded">Ord:</span> Top Trades (Menor para Maior)</li>
+              <li @click="sortBy('trades', 'desc')"><span class="text-faded">Ord:</span> Top Trades (Maior para Menor)</li>
+              <li @click="sortBy('longShortRatio', 'asc')"><span class="text-faded">Ord:</span> Long/Short (Menor para Maior)</li>
+              <li @click="sortBy('longShortRatio', 'desc')"><span class="text-faded">Ord:</span> Long/Short (Maior para Menor)</li>
+              
+
             </ul>
           </div>
           <div class="dropdown">
             <div class="form-input text-nowrap shadow-box">▼ {{ asset }}</div>
             <ul>
               <li @click="filterAsset('USDT')"><span class="text-faded">Asset:</span> USDT</li>
-              </ul>
+              <li @click="filterAsset('BTC')"><span class="text-faded">Asset:</span> BTC</li>
+            </ul>
           </div>
         </div>
       </div>
     </header>
+
+    <!-- price list grid -->
     <main class="main-wrap">
       <div class="main-grid-list">
         <div class="main-grid-item" v-for="c in coinsList" :key="c.symbol" :class="c.style">
@@ -86,8 +100,9 @@
                   <h2 class="text-bright text-clip">
                     {{ c.close | toFixed(asset) }}
                   </h2>
+                  <!-- Display Long Short Ratio -->
                   <div class="text-clip">
-                    LSR: {{ c.longShortRatio }}
+                    Long Short Ratio: {{ c.longShortRatio }}
                   </div>
                 </div>
                 <div class="text-right">
@@ -100,22 +115,18 @@
                   <div class="text-clip">
                     {{ c.assetVolume | toMoney }} <small class="text-faded">Vol</small>
                   </div>
-                  <div class="text-clip">
-                    Volat: {{ c.volatility | toFixed(2) }}%
-                    <span v-if="c.volatility >= 15">🔥</span>
-                    <span v-else>❄️</span>
-                  </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="main-grid-chart">
-            <linechart :width="380" :height="40" :values="c.history" :volatility="c.volatility"></linechart>
+            <linechart :width="400" :height="40" :values="c.history"></linechart>
           </div>
         </div>
       </div>
     </main>
 
+    <!-- socket loader -->
     <div class="loader-wrap" :class="{ 'visible': loaderVisible }">
       <img src="https://betabot.store/painel.gif" alt="Beta Bot" v-if="status !== 3" class="loading" style="width: 350px; height: 350px;">
       <div v-if="status === 0"></div>
@@ -124,20 +135,20 @@
     </div>
   </div>
 
+  <!-- Google AdSense Code -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
   <ins class="adsbygoogle"
        style="display:block"
        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
        data-ad-slot="XXXXXXXXXX"
        data-ad-format="auto"></ins>
- 
-
   <script>
     (adsbygoogle = window.adsbygoogle || []).push({});
   </script>
 
+  <!-- Vue.js and other scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
-  <script src="https://betabot.store/p2/script.js"></script>
+  <script src="./script.js"></script>
 
   <a href="https://t.me/BETABOTROMPIMENTO" target="_blank" class="telegram-float">
     <img src="https://betabot.store/rastreador/telegram.png" alt="Telegram Icon" style="width: 50px; height: 50px;">
