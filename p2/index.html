@@ -52,21 +52,20 @@
           <div class="dropdown">
             <div class="form-input text-nowrap shadow-box">▼ {{ sortLabel }}</div>
             <ul>
-              <li @click="sortBy('token', 'asc')"><span class="text-faded">Ord:</span> Token</li>
-              <li @click="sortBy('close', 'desc')"><span class="text-faded">Ord:</span> Price</li>
-              <li @click="sortBy('assetVolume', 'desc')"><span class="text-faded">Ord:</span> Volume</li>
-              <li @click="sortBy('percent', 'desc')"><span class="text-faded">Ord:</span> Percent</li>
-              <li @click="sortBy('trades', 'desc')"><span class="text-faded">Ord:</span> Trades</li>
-              <li @click="sortBy('longShortRatio', 'asc')"><span class="text-faded">Ord:</span> Long/Short</li>
-              <li @click="sortBy('volatility', 'desc')"><span class="text-faded">Ord:</span> Volatility</li>
+              <li @click="sortBy('token', 'asc')"><span class="text-faded"></span> Token</li>
+              <li @click="sortBy('close', 'desc')"><span class="text-faded"></span> Price</li>
+              <li @click="sortBy('assetVolume', 'desc')"><span class="text-faded"></span> Volume</li>
+              <li @click="sortBy('percent', 'desc')"><span class="text-faded"></span> Percent</li>
+              <li @click="sortBy('trades', 'desc')"><span class="text-faded"></span> Trades</li>
+              <li @click="sortBy('longShortRatio', 'asc')"><span class="text-faded"></span> Long/Short</li>
+              <li @click="sortBy('volatility', 'desc')"><span class="text-faded"></span> Volatility</li>
             </ul>
           </div>
           <div class="dropdown">
             <div class="form-input text-nowrap shadow-box">▼ {{ asset }}</div>
             <ul>
               <li @click="filterAsset('USDT')"><span class="text-faded">Asset:</span> USDT</li>
-              <li @click="filterAsset('BTC')"><span class="text-faded">Asset:</span> BTC</li>
-            </ul>
+              </ul>
           </div>
         </div>
       </div>
