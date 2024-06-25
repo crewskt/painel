@@ -269,7 +269,7 @@ new Vue({
             history: newHistory,
             volatility: volatility,
           };
-        }
+        }  
         return coin;
       });
     },
