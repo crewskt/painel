@@ -115,8 +115,6 @@ new Vue({
     this.loadCoins();
     this.connectSocket();
     this.loadLSRFromLocalStorage();
-    this.loadLongShortRatios(); // Iniciar o carregamento dos ratios long/short
-    setInterval(this.loadLongShortRatios, 300000); // Atualizar a cada 5 minutos
   },
   computed: {
     sortLabel() {
@@ -179,7 +177,11 @@ new Vue({
         // Obter a última moeda listada
         await this.loadLatestCoin();
 
-        this.loadLongShortRatios();
+        // Carregar os ratios long/short uma vez na inicialização
+        await this.loadLongShortRatios();
+        this.saveLSRToLocalStorage();
+        // Atualizar a cada 5 minutos
+        setInterval(this.loadLongShortRatios, 300000);
       } catch (error) {
         console.error("Failed to load coins:", error);
         this.status = -1;
@@ -205,7 +207,7 @@ new Vue({
     },
     async loadLongShortRatios() {
       const symbols = this.coins.map(c => c.symbol);
-      
+
       const fetchLongShortRatio = async (symbol) => {
         try {
           const response = await fetch(`https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${symbol}&period=5m`);
@@ -226,13 +228,9 @@ new Vue({
         }
       };
 
-      // Initial fetch
-      await Promise.all(symbols.map(symbol => fetchLongShortRatio(symbol)));
-
-      // Set interval to update every 5 minutes
-      setInterval(async () => {
-        await Promise.all(symbols.map(symbol => fetchLongShortRatio(symbol)));
-      }, 300000); // 5 minutes in milliseconds
+      for (const symbol of symbols) {
+        await fetchLongShortRatio(symbol);
+      }
     },
     updateCoinsWithRatios() {
       this.coins = this.coins.map(coin => ({
