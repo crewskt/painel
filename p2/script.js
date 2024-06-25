@@ -115,6 +115,8 @@ new Vue({
     this.loadCoins();
     this.connectSocket();
     this.loadLSRFromLocalStorage();
+    this.loadLatestCoin();
+    setInterval(this.loadLatestCoin, 3600000); // Atualiza a cada 1 hora (3600000 ms)
   },
   computed: {
     sortLabel() {
@@ -174,9 +176,6 @@ new Vue({
           }));
         this.status = 1;
 
-        // Obter a última moeda listada
-        await this.loadLatestCoin();
-
         // Carregar os ratios long/short uma vez na inicialização
         await this.loadLongShortRatios();
         this.saveLSRToLocalStorage();
@@ -200,6 +199,7 @@ new Vue({
 
         if (latestCoin) {
           this.latestCoin = latestCoin;
+          document.getElementById('latest-coin').innerHTML = `Última moeda listada: ${this.latestCoin.token}`;
         }
       } catch (error) {
         console.error("Failed to load latest coin:", error);
@@ -233,67 +233,83 @@ new Vue({
       }
     },
     updateCoinsWithRatios() {
-      this.coins = this.coins.map(coin => ({
-        ...coin,
-        longShortRatio: this.longShortRatios[coin.symbol],
-      }));
-    },
-    connectSocket() {
-      this.socket = new WebSocket("wss://fstream.binance.com/stream?streams=!ticker@arr");
+              this.coins = this.coins.map(coin => ({
+          ...coin,
+          longShortRatio: this.longShortRatios[coin.symbol] || 'N/A',
+        }));
 
-      this.socket.onmessage = (event) => {
-        const data = JSON.parse(event.data).data;
-        this.updateCoinPrices(data);
-      };
+        // Salvar no armazenamento local
+        this.saveLSRToLocalStorage();
+      },
+      connectSocket() {
+        const socket = new WebSocket("wss://fstream.binance.com/ws/!ticker@arr");
+        this.socket = socket;
 
-      this.socket.onclose = () => {
-        console.log("WebSocket connection closed. Reconnecting...");
-        setTimeout(this.connectSocket, 1000);
-      };
+        socket.onopen = () => {
+          console.log("Socket connected");
+        };
 
-      this.socket.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        this.socket.close();
-      };
-    },
-    updateCoinPrices(data) {
-      this.coins = this.coins.map(coin => {
-        const ticker = data.find(t => t.s === coin.symbol);
-        if (ticker) {
-          const newHistory = coin.history.slice(-29).concat(Number(ticker.c));
-          const volatility = ((ticker.h - ticker.l) / ticker.o) * 100; // Exemplo de cálculo de volatilidade
-          return {
-            ...coin,
-            close: Number(ticker.c),
-            change: Number(ticker.p),
-            percent: Number(ticker.P),
-            assetVolume: Number(ticker.q),
-            trades: Number(ticker.n),
-            history: newHistory,
-            volatility: volatility,
-          };
+        socket.onerror = (error) => {
+          console.error("Socket error:", error);
+        };
+
+        socket.onmessage = (event) => {
+          try {
+            const tickers = JSON.parse(event.data);
+            this.updateCoinsFromSocket(tickers);
+          } catch (error) {
+            console.error("Error parsing message from socket:", error);
+          }
+        };
+
+        socket.onclose = () => {
+          console.log("Socket closed, reconnecting...");
+          setTimeout(() => {
+            this.connectSocket();
+          }, 5000);
+        };
+      },
+      updateCoinsFromSocket(tickers) {
+        tickers.forEach(ticker => {
+          const symbol = ticker.s;
+          const coinIndex = this.coins.findIndex(c => c.symbol === symbol);
+          if (coinIndex !== -1) {
+            const coin = this.coins[coinIndex];
+            coin.close = parseFloat(ticker.c);
+            coin.open = parseFloat(ticker.o);
+            coin.high = parseFloat(ticker.h);
+            coin.low = parseFloat(ticker.l);
+            coin.change = parseFloat(ticker.p);
+            coin.percent = parseFloat(ticker.P);
+            coin.assetVolume = parseFloat(ticker.q);
+            coin.trades = parseInt(ticker.n);
+            coin.style = {
+              gain: coin.change > 0,
+              loss: coin.change < 0,
+            };
+            this.$set(this.coins, coinIndex, coin);
+          }
+        });
+      },
+      saveLSRToLocalStorage() {
+        localStorage.setItem("longShortRatios", JSON.stringify(this.longShortRatios));
+      },
+      loadLSRFromLocalStorage() {
+        const storedLSR = localStorage.getItem("longShortRatios");
+        if (storedLSR) {
+          this.longShortRatios = JSON.parse(storedLSR);
+          this.updateCoinsWithRatios();
         }
-        return coin;
-      });
+      },
+      sortCoins(key) {
+        if (this.sort.key === key) {
+          this.sort.order = this.sort.order === 'asc' ? 'desc' : 'asc';
+        } else {
+          this.sort.key = key;
+          this.sort.order = 'asc';
+        }
+      },
     },
-    saveLSRToLocalStorage() {
-      const lsrData = JSON.stringify(this.longShortRatios);
-      localStorage.setItem("lsr", lsrData);
-    },
-    loadLSRFromLocalStorage() {
-      const lsrData = localStorage.getItem("lsr");
-      if (lsrData) {
-        this.longShortRatios = JSON.parse(lsrData);
-        this.updateCoinsWithRatios();
-      }
-    },
-  },
-  watch: {
-    coins() {
-      // Exibir a última moeda listada
-      if (this.latestCoin) {
-        document.getElementById('latest-coin').innerHTML = `Última moeda listada: ${this.latestCoin.token}`;
-      }
-    }
-  },
-});
+  });
+
+
