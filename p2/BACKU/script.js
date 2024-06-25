@@ -170,8 +170,6 @@ new Vue({
             percent: Number(d.priceChangePercent),
             assetVolume: Number(d.volume),
             trades: Number(d.count),
-            longShortRatio: Number(d.longShortRatio),
-            volatility: Number(d.volatility),
             history: [Number(d.lastPrice) * 0.95, Number(d.lastPrice) * 1.05, Number(d.lastPrice)],
             style: {
               gain: d.priceChange > 0,
