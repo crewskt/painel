@@ -43,11 +43,11 @@ Vue.component("linechart", {
   <canvas :width="width" :height="height"></canvas>
   <span v-if="volatility >= 10" class="volatility-text" style="margin-left: 10px; color: green;">
        
-        Volatilidade Alta 
+
   </span>
   <span v-else class="volatility-text" style="margin-left: 10px; color: red;">
             
-        Volatilidade Baixa   
+
   </span>
 </div>
   `,
