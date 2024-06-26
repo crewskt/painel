@@ -24,6 +24,24 @@
 }
 
 
+
+  /* Estilo para desktop */
+  @media screen and (min-width: 768px) {
+    .volatility-text {
+      font-size: 15px; /* Tamanho da fonte para desktop */
+    }
+  }
+
+  /* Estilo para dispositivos móveis */
+  @media screen and (max-width: 767px) {
+    .volatility-text {
+      font-size: 10px; /* Tamanho da fonte para dispositivos móveis */
+    }
+  }
+
+
+
+
 .last-listed-coin {
   margin-left: 5px;
   font-size: 1.2em;
