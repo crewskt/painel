@@ -1,17 +1,18 @@
+
+
 // Filtros de número comuns
 Vue.filter("toFixed", (num, asset) => {
-  if (num == null) return '0.00';
   const precision = asset === "USDT" ? 5 : 2;
   return Number(num).toFixed(precision);
 });
 
 Vue.filter("toMoney", (num) => {
-  if (num == null) return '0';
-  return Number(num).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return Number(num)
+    .toFixed(0)
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 });
 
 Vue.filter("formatVolume", (num) => {
-  if (num == null) return '0';
   if (num >= 1e9) {
     return (num / 1e9).toFixed(3) + 'B';
   } else if (num >= 1e6) {
@@ -24,7 +25,6 @@ Vue.filter("formatVolume", (num) => {
 });
 
 Vue.filter("toPercent", (num) => {
-  if (num == null) return '0.00%';
   return `${(num * 100).toFixed(2)}%`;
 });
 
@@ -41,16 +41,15 @@ Vue.component("linechart", {
   template: `
     <div>
       <canvas :width="width" :height="height"></canvas>
-      <span v-if="volatility >= 10" style="margin-left: 2px; color: green;">🔼High Volatility</span>
-      <span v-else style="margin-left: 2px; color: red;">🔽Low Volatility</span>
+      <span v-if="volatility >= 5" style="margin-left: 10px;"></span>
+      <span v-else-if="volatility < 5" style="margin-left: 10px;"></span>
     </div>
   `,
   watch: {
-    values: 'renderChart',
-    width: 'renderChart',
-    height: 'renderChart',
-    lineColor: 'renderChart',
-    lineWidth: 'renderChart'
+    values: {
+      handler: 'renderChart',
+      deep: true,
+    }
   },
   mounted() {
     this.renderChart();
@@ -62,8 +61,6 @@ Vue.component("linechart", {
 
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, this.width, this.height);
-
-      if (this.values.length === 0) return;
 
       const max = Math.max(...this.values);
       const min = Math.min(...this.values);
@@ -77,8 +74,10 @@ Vue.component("linechart", {
         const x = (index / (scaledValues.length - 1)) * this.width;
         const y = this.height - val;
 
+        // Definir cor e espessura da linha
         ctx.strokeStyle = this.lineColor;
         ctx.lineWidth = this.lineWidth;
+
         ctx.lineTo(x, y);
       });
 
@@ -98,6 +97,7 @@ new Vue({
       loaderVisible: true,
       coins: [],
       longShortRatios: {},
+      longShortRatioHistory: {},
       sort: {
         key: "token",
         order: "asc",
@@ -115,7 +115,6 @@ new Vue({
     this.loadLongShortRatios(); // Iniciar o carregamento dos ratios long/short
     setInterval(this.loadLongShortRatios, 300000); // Atualizar a cada 5 minutos
     this.loadFavoriteCoins(); // Carregar moedas favoritas do localStorage
-    this.resetPercentagesAt9PM(); // Adiciona a lógica para zerar as porcentagens às 21h
   },
   computed: {
     sortLabel() {
@@ -178,7 +177,7 @@ new Vue({
             longShortRatio: null,
             volatility: 0, // Inicialmente 0, você pode calcular isso conforme necessário
           }));
-
+        
         // Obter a última moeda listada
         await this.loadLastListedCoin();
 
@@ -215,7 +214,7 @@ new Vue({
           };
           this.updateCoinsWithRatios();
         } catch (error) {
-          console.error(`Failed to fetch long/short ratio for ${symbol}:`, error);
+          console.error(`Failed to load long/short ratio for ${symbol}:`, error);
           this.longShortRatios = {
             ...this.longShortRatios,
             [symbol]: 'N/A',
@@ -319,23 +318,6 @@ new Vue({
       if (favoriteCoins) {
         this.favoriteCoins = JSON.parse(favoriteCoins);
       }
-    },
-    resetPercentagesAt9PM() {
-      const now = new Date();
-      const utcOffset = -3; // Horário de Brasília é UTC-3
-      const hoursUntil9PM = (21 - (now.getUTCHours() + utcOffset) + 24) % 24;
-      const millisecondsUntil9PM = hoursUntil9PM * 60 * 60 * 1000 - (now.getMinutes() * 60 * 1000 + now.getSeconds() * 1000 + now.getMilliseconds());
-
-      setTimeout(() => {
-        this.resetPositivePercentages();
-        setInterval(this.resetPositivePercentages, 24 * 60 * 60 * 1000); // Repetir a cada 24 horas
-      }, millisecondsUntil9PM);
-    },
-    resetPositivePercentages() {
-      this.coins = this.coins.map(coin => ({
-        ...coin,
-        percent: coin.percent > 0 ? 0 : coin.percent,
-      }));
     },
   },
 });
