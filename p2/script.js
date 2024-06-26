@@ -202,18 +202,32 @@ new Vue({
     },
     async loadLongShortRatios() {
       const symbols = this.coins.map(c => c.symbol);
-      
+
       const fetchLongShortRatio = async (symbol) => {
+        const cacheKey = `longShortRatio_${symbol}`;
+        const cachedData = localStorage.getItem(cacheKey);
+        const cacheDuration = 5 * 60 * 1000; // 5 minutos em milissegundos
+        
+        if (cachedData && (Date.now() - JSON.parse(cachedData).timestamp < cacheDuration)) {
+          this.longShortRatios = {
+            ...this.longShortRatios,
+            [symbol]: JSON.parse(cachedData).ratio,
+          };
+          this.updateCoinsWithRatios();
+          return;
+        }
+
         try {
           const response = await fetch(`https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${symbol}&period=5m`);
           if (!response.ok) throw new Error('Failed to fetch');
           const data = await response.json();
-          const ratio = data.length >= 30 ? Number(data[29].longShortRatio).toFixed(4) : 'N/A';
+          const ratio = data.length >= 30 ? Number(data[30].longShortRatio).toFixed(4) : 'N/A';
           this.longShortRatios = {
             ...this.longShortRatios,
             [symbol]: ratio,
           };
           this.updateCoinsWithRatios();
+          localStorage.setItem(cacheKey, JSON.stringify({ ratio, timestamp: Date.now() }));
         } catch (error) {
           console.error(`Failed to fetch long/short ratio for ${symbol}:`, error);
           this.longShortRatios = {
@@ -223,13 +237,17 @@ new Vue({
         }
       };
 
-      // Initial fetch
-      await Promise.all(symbols.map(symbol => fetchLongShortRatio(symbol)));
+      for (const symbol of symbols) {
+        await fetchLongShortRatio(symbol);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1 segundo antes da próxima requisição
+      }
 
-      // Set interval to update every 5 minutes
       setInterval(async () => {
-        await Promise.all(symbols.map(symbol => fetchLongShortRatio(symbol)));
-      }, 300000); // 5 minutes in milliseconds
+        for (const symbol of symbols) {
+          await fetchLongShortRatio(symbol);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1 segundo antes da próxima requisição
+        }
+      }, 300000); // 5 minutos em milissegundos
     },
     updateCoinsWithRatios() {
       this.coins = this.coins.map(coin => ({
@@ -303,39 +321,42 @@ new Vue({
         this.updateCoinsWithRatios();
       }
     },
-    toggleDarkMode() {
-      this.isDarkMode = !this.isDarkMode;
-    },
-    toggleFavorite(coin) {
-      if (this.favoriteCoins.includes(coin.symbol)) {
-        this.favoriteCoins = this.favoriteCoins.filter(fav => fav !== coin.symbol);
+    toggleFavorite(symbol) {
+      if (this.favoriteCoins.includes(symbol)) {
+        this.favoriteCoins = this.favoriteCoins.filter(coin => coin !== symbol);
       } else {
-        this.favoriteCoins.push(coin.symbol);
+        this.favoriteCoins.push(symbol);
       }
+      this.saveFavoriteCoins();
+    },
+    saveFavoriteCoins() {
       localStorage.setItem("favoriteCoins", JSON.stringify(this.favoriteCoins));
     },
     loadFavoriteCoins() {
-      const favoriteCoins = localStorage.getItem("favoriteCoins");
-      if (favoriteCoins) {
-        this.favoriteCoins = JSON.parse(favoriteCoins);
+      const savedFavorites = localStorage.getItem("favoriteCoins");
+      if (savedFavorites) {
+        this.favoriteCoins = JSON.parse(savedFavorites);
       }
+    },
+    toggleDarkMode() {
+      this.isDarkMode = !this.isDarkMode;
+      document.body.classList.toggle("dark-mode", this.isDarkMode);
     },
     resetPercentagesAt9PM() {
       const now = new Date();
-      const utcOffset = -3; // Horário de Brasília é UTC-3
-      const hoursUntil9PM = (21 - (now.getUTCHours() + utcOffset) + 24) % 24;
-      const millisecondsUntil9PM = hoursUntil9PM * 60 * 60 * 1000 - (now.getMinutes() * 60 * 1000 + now.getSeconds() * 1000 + now.getMilliseconds());
-
+      const next9PM = new Date();
+      next9PM.setHours(21, 0, 0, 0);
+      if (now > next9PM) {
+        next9PM.setDate(now.getDate() + 1);
+      }
+      const timeUntilNext9PM = next9PM - now;
       setTimeout(() => {
-        this.resetPositivePercentages();
-        setInterval(this.resetPositivePercentages, 24 * 60 * 60 * 1000); // Repetir a cada 24 horas
-      }, millisecondsUntil9PM);
-    },
-    resetPositivePercentages() {
-      this.coins = this.coins.map(coin => ({
-        ...coin,
-        percent: coin.percent > 0 ? 0 : coin.percent,
-      }));
+        this.coins = this.coins.map(coin => ({
+          ...coin,
+          percent: 0,
+        }));
+        this.resetPercentagesAt9PM();
+      }, timeUntilNext9PM);
     },
   },
 });
