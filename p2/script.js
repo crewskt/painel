@@ -41,8 +41,8 @@ Vue.component("linechart", {
   template: `
     <div>
       <canvas :width="width" :height="height"></canvas>
-      <span v-if="volatility >= 5" style="margin-left: 5x; color: green;">High Volatility</span>
-      <span v-else style="margin-left: 5px; color: red;">Low Volatility</span>
+      <span v-if="volatility >= 5" style="margin-left: 5x; color: green;">🔼High Volatility</span>
+      <span v-else style="margin-left: 5px; color: red;">🔽Low Volatility</span>
     </div>
   `,
   watch: {
