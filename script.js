@@ -1,230 +1,341 @@
-// common number filters
+// Filtros de número comuns
 Vue.filter("toFixed", (num, asset) => {
-  const precision = asset === "USDT" ? 5 : 2; // Define 5 decimal places for USDT, 8 for others
+  if (num == null) return '0.00';
+  const precision = asset === "USDT" ? 5 : 2;
   return Number(num).toFixed(precision);
 });
 
-
-
 Vue.filter("toMoney", (num) => {
-  return Number(num)
-    .toFixed(0)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  if (num == null) return '0';
+  return Number(num).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 });
 
-// component for creating line chart
+Vue.filter("formatVolume", (num) => {
+  if (num == null) return '0';
+  if (num >= 1e9) {
+    return (num / 1e9).toFixed(3) + 'B';
+  } else if (num >= 1e6) {
+    return (num / 1e6).toFixed(3) + 'M';
+  } else if (num >= 1e3) {
+    return (num / 1e3).toFixed(3) + 'K';
+  } else {
+    return num.toFixed(3);
+  }
+});
+
+Vue.filter("toPercent", (num) => {
+  if (num == null) return '0.00%';
+  return `${(num * 100).toFixed(2)}%`;
+});
+
+// Componente para criar gráfico de linha
 Vue.component("linechart", {
   props: {
     width: { type: Number, default: 400, required: true },
     height: { type: Number, default: 40, required: true },
-    values: { type: Array, default: [], required: true },
-  },
-  data() {
-    return { cx: 0, cy: 0 };
-  },
-  computed: {
-    viewBox() {
-      return `0 0 ${this.width} ${this.height}`;
-    },
-    chartPoints() {
-      const data = this.getPoints();
-      const last = data.length ? data[data.length - 1] : { x: 0, y: 0 };
-      const list = data.map((d) => `${d.x},${d.y}`);
-      this.cx = last.x;
-      this.cy = last.y;
-      return list.join(" ");
-    },
-  },
-  methods: {
-    getPoints() {
-      const width = this.width;
-      const height = this.height;
-      const min = Math.min(...this.values);
-      const max = Math.max(...this.values);
-      const range = max > min ? max - min : height;
-      const gap = this.values.length > 1 ? width / (this.values.length - 1) : 1;
-      const halfHeight = height / 2;
-
-      return this.values.map((value, index) => {
-        const normalizedValue = 2 * ((value - min) / range - 0.5);
-        const x = index * gap;
-        const y = -normalizedValue * halfHeight * 0.8 + halfHeight;
-        return { x, y };
-      });
-    },
+    values: { type: Array, default: () => [], required: true },
+    volatility: { type: Number, default: 0, required: true },
+    lineColor: { type: String, default: '#33f702' },
+    lineWidth: { type: Number, default: 2 }
   },
   template: `
-  <svg :viewBox="viewBox" xmlns="http://www.w3.org/2000/svg">
-    <polyline class="color" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" :points="chartPoints" />
-    <circle class="color" :cx="cx" :cy="cy" r="4" fill="#fff" stroke="none" />
-  </svg>`,
-});
-
-// vue instance
-new Vue({
-  el: "#app",
-  data: {
-    endpoint: "wss://fstream.binance.com/ws/!ticker@arr",
-    iconbase: "./icons/",
-    cache: {},
-    coins: [],
-    asset: "USDT",
-    search: "",
-    sort: "percent",
-    order: "desc",
-    limit: 50,
-    status: 0,
-    sock: null,
-    cx: 0,
-    cy: 0,
-  },
-  computed: {
-    coinsList() {
-      let list = [...this.coins];
-      const search = this.search.replace(/[^\s\w\-\.]+/g, "").trim();
-
-      if (this.asset) {
-        list = list.filter((i) => i.asset === this.asset);
-      }
-      if (search.length > 1) {
-        const reg = new RegExp(`^(${search})`, "i");
-        list = list.filter((i) => reg.test(i.token));
-      }
-      if (this.sort) {
-        list = this.sortList(list, this.sort, this.order);
-      }
-      if (this.limit) {
-        list = list.slice(0, this.limit);
-      }
-      return list;
-    },
-    loaderVisible() {
-      return this.status !== 2;
-    },
-    sortLabel() {
-      const labels = {
-        token: "Token",
-        percent: "Percent",
-        close: "Price",
-        change: "Change",
-        assetVolume: "Volume",
-        tokenVolume: "Volume",
-        trades: "Trades",
-      };
-      return labels[this.sort] || "Default";
-    },
-  },
-  methods: {
-    sortBy(key, order) {
-      this.order = this.sort === key ? (this.order === "asc" ? "desc" : "asc") : order || "asc";
-      this.sort = key;
-    },
-    filterAsset(asset) {
-      this.asset = String(asset || "BTC");
-    },
-    setLimit(limit) {
-      this.limit = parseInt(limit) || 0;
-    },
-    onSockOpen() {
-      this.status = 1;
-      console.info("WebSocketInfo: Connection open (" + this.endpoint + ").");
-    },
-    onSockClose() {
-      this.status = 0;
-      console.info("WebSocketInfo: Connection closed (" + this.endpoint + ").");
-      setTimeout(this.sockInit, 10000);
-    },
-    onSockError(err) {
-      this.status = -1;
-      console.error("WebSocketError:", err.message || err);
-      setTimeout(this.sockInit, 10000);
-    },
-    onSockData(e) {
-      const list = JSON.parse(e.data) || [];
-      list.forEach(item => {
-        const coin = this.getCoinData(item);
-        coin.history = this.cache[coin.symbol]?.history || this.fakeHistory(coin.close);
-        if (coin.history.length > 100) coin.history = coin.history.slice(-100);
-        coin.history.push(coin.close);
-        this.cache[coin.symbol] = coin;
-      });
-      this.coins = Object.values(this.cache);
-      this.status = 2;
-    },
-    sockInit() {
-      if (this.status > 0) return;
-      try {
-        this.status = 0;
-        this.sock = new WebSocket(this.endpoint);
-        this.sock.addEventListener("open", this.onSockOpen);
-        this.sock.addEventListener("close", this.onSockClose);
-        this.sock.addEventListener("error", this.onSockError);
-        this.sock.addEventListener("message", this.onSockData);
-      } catch (err) {
-        console.error("WebSocketError:", err.message || err);
-        this.status = -1;
-        this.sock = null;
-      }
-    },
-    sockClose() {
-      if (this.sock) {
-        this.sock.close();
-      }
-    },
-    fakeHistory(close) {
-      const num = close * 0.0001;
-      const min = -Math.abs(num);
-      const max = Math.abs(num);
-      return Array.from({ length: 50 }, () => close + Math.random() * (max - min) + min);
-    },
-    getCoinData(item) {
-      const reg = /^([A-Z]+)(BTC|ETH|BNB|USDT|TUSD)$/;
-      const symbol = item.s.replace(/[^\w\-]+/g, "").toUpperCase();
-      const token = symbol.replace(reg, "$1");
-      const asset = symbol.replace(reg, "$2");
-      const pair = `${token}/${asset}`;
-      const icon = `${this.iconbase}${token.toLowerCase()}.png`;
-      const close = parseFloat(item.c);
-      const percent = parseFloat(item.P);
-      const sign = percent >= 0 ? "+" : "";
-      const arrow = percent >= 0 ? "▲" : "▼";
-      const info = `${pair} ${close.toFixed(8)} (${arrow} ${sign}${percent.toFixed(2)}% | ${sign}${parseFloat(item.p).toFixed(8)})`;
-      const style = percent > 0 ? "gain" : percent < 0 ? "loss" : "";
-
-      return {
-        symbol,
-        token,
-        asset,
-        pair,
-        icon,
-        open: parseFloat(item.o),
-        high: parseFloat(item.h),
-        low: parseFloat(item.l),
-        close,
-        change: parseFloat(item.p),
-        percent,
-        trades: parseInt(item.n),
-        tokenVolume: Math.round(item.v),
-        assetVolume: Math.round(item.q),
-        sign,
-        arrow,
-        style,
-        info,
-      };
-    },
-    sortList(list, key, order) {
-      return list.sort((a, b) => {
-        const valA = typeof a[key] === "string" ? a[key].toUpperCase() : a[key];
-        const valB = typeof b[key] === "string" ? b[key].toUpperCase() : b[key];
-        if (order === "asc") return valA < valB ? -1 : valA > valB ? 1 : 0;
-        return valA > valB ? -1 : valA < valB ? 1 : 0;
-      });
-    },
+    <div>
+      <canvas :width="width" :height="height"></canvas>
+      <span v-if="volatility >= 10" style="margin-left: 2px; color: green;">🔼High Volatility</span>
+      <span v-else style="margin-left: 2px; color: red;">🔽Low Volatility</span>
+    </div>
+  `,
+  watch: {
+    values: 'renderChart',
+    width: 'renderChart',
+    height: 'renderChart',
+    lineColor: 'renderChart',
+    lineWidth: 'renderChart'
   },
   mounted() {
-    this.sockInit();
+    this.renderChart();
   },
-  destroyed() {
-    this.sockClose();
+  methods: {
+    renderChart() {
+      const canvas = this.$el.querySelector('canvas');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, this.width, this.height);
+
+      if (this.values.length === 0) return;
+
+      const max = Math.max(...this.values);
+      const min = Math.min(...this.values);
+      const range = max - min || 1;
+      const scaledValues = this.values.map(val => ((val - min) / range) * this.height);
+
+      ctx.beginPath();
+      ctx.moveTo(0, this.height - scaledValues[0]);
+
+      scaledValues.forEach((val, index) => {
+        const x = (index / (scaledValues.length - 1)) * this.width;
+        const y = this.height - val;
+
+        ctx.strokeStyle = this.lineColor;
+        ctx.lineWidth = this.lineWidth;
+        ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+    },
+  },
+});
+
+new Vue({
+  el: "#app",
+  data() {
+    return {
+      search: "",
+      limit: 20,
+      asset: "USDT",
+      status: 0,
+      loaderVisible: true,
+      coins: [],
+      longShortRatios: {},
+      sort: {
+        key: "token",
+        order: "asc",
+      },
+      socket: null,
+      lastListedCoin: null, // Estado para a última moeda listada
+      isDarkMode: false, // Estado para modo escuro
+      favoriteCoins: [], // Estado para moedas favoritas
+    };
+  },
+  created() {
+    this.loadCoins();
+    this.connectSocket();
+    this.loadLSRFromLocalStorage();
+    this.loadLongShortRatios(); // Iniciar o carregamento dos ratios long/short
+    setInterval(this.loadLongShortRatios, 300000); // Atualizar a cada 5 minutos
+    this.loadFavoriteCoins(); // Carregar moedas favoritas do localStorage
+    this.resetPercentagesAt9PM(); // Adiciona a lógica para zerar as porcentagens às 21h
+  },
+  computed: {
+    sortLabel() {
+      const keyMap = {
+        token: "Token",
+        close: "Price",
+        assetVolume: "Volume",
+        percent: "Percent",
+        trades: "Trades",
+        longShortRatio: "Long/Short",
+        volatility: "Volatility",
+      };
+      return ` ${keyMap[this.sort.key]}`;
+    },
+    coinsList() {
+      let sortedCoins = this.filteredCoins;
+      if (this.sort.key) {
+        sortedCoins = sortedCoins.sort((a, b) => {
+          const aVal = a[this.sort.key];
+          const bVal = b[this.sort.key];
+          const comparison = aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+          return this.sort.order === "asc" ? comparison : -comparison;
+        });
+      }
+      return this.limit > 0 ? sortedCoins.slice(0, this.limit) : sortedCoins;
+    },
+    filteredCoins() {
+      return this.coins.filter(c => c.token.toLowerCase().includes(this.search.toLowerCase()));
+    },
+    favoriteCoinsList() {
+      return this.coins.filter(c => this.favoriteCoins.includes(c.symbol));
+    }
+  },
+  methods: {
+    async loadCoins() {
+      try {
+        const response = await fetch("https://fapi.binance.com/fapi/v1/ticker/24hr");
+        const data = await response.json();
+        this.coins = data.filter(d => d.symbol.endsWith("USDT") && 
+          !["DGBUSDT", "WAVESUSDT", "MDTUSDT","RADUSDT","STRAXUSDT","SLPUSDT","IDEXUSDT","CVXUSDT","SNTUSDT","STPTUSDT","CTKUSDT","GLMRUSDT","AGIXUSDT","OCEANUSDT"].includes(d.symbol))
+          .map(d => ({
+            symbol: d.symbol,
+            pair: d.symbol,
+            token: d.symbol.replace("USDT", ""),
+            asset: "USDT",
+            icon: `https://betabot.store/icons/${d.symbol.replace("USDT", "").toLowerCase()}.png`,
+            close: Number(d.lastPrice),
+            open: Number(d.openPrice),
+            high: Number(d.highPrice),
+            low: Number(d.lowPrice),
+            change: Number(d.priceChange),
+            percent: Number(d.priceChangePercent),
+            assetVolume: Number(d.volume),
+            trades: Number(d.count),
+            history: [Number(d.lastPrice) * 0.95, Number(d.lastPrice) * 1.05, Number(d.lastPrice)],
+            style: {
+              gain: d.priceChange > 0,
+              loss: d.priceChange < 0,
+            },
+            longShortRatio: null,
+            volatility: 0, // Inicialmente 0, você pode calcular isso conforme necessário
+          }));
+
+        // Obter a última moeda listada
+        await this.loadLastListedCoin();
+
+        this.loadLongShortRatios();
+        this.status = 1;
+      } catch (error) {
+        console.error("Failed to load coins:", error);
+        this.status = -1;
+      }
+    },
+    async loadLastListedCoin() {
+      try {
+        const response = await fetch("https://fapi.binance.com/fapi/v1/exchangeInfo");
+        const data = await response.json();
+        const symbols = data.symbols.filter(s => s.contractType === "PERPETUAL" && s.symbol.endsWith("USDT"));
+        symbols.sort((a, b) => new Date(b.onboardDate) - new Date(a.onboardDate));
+        this.lastListedCoin = symbols[0].symbol.replace("USDT", "");
+      } catch (error) {
+        console.error("Failed to load last listed coin:", error);
+      }
+    },
+    async loadLongShortRatios() {
+      const symbols = this.coins.map(c => c.symbol);
+      
+      const fetchLongShortRatio = async (symbol) => {
+        try {
+          const response = await fetch(`https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${symbol}&period=5m`);
+          if (!response.ok) throw new Error('Failed to fetch');
+          const data = await response.json();
+          const ratio = data.length >= 30 ? Number(data[29].longShortRatio).toFixed(4) : 'N/A';
+          this.longShortRatios = {
+            ...this.longShortRatios,
+            [symbol]: ratio,
+          };
+          this.updateCoinsWithRatios();
+        } catch (error) {
+          console.error(`Failed to fetch long/short ratio for ${symbol}:`, error);
+          this.longShortRatios = {
+            ...this.longShortRatios,
+            [symbol]: 'N/A',
+          };
+        }
+      };
+
+      // Initial fetch
+      await Promise.all(symbols.map(symbol => fetchLongShortRatio(symbol)));
+
+      // Set interval to update every 5 minutes
+      setInterval(async () => {
+        await Promise.all(symbols.map(symbol => fetchLongShortRatio(symbol)));
+      }, 300000); // 5 minutes in milliseconds
+    },
+    updateCoinsWithRatios() {
+      this.coins = this.coins.map(coin => ({
+        ...coin,
+        longShortRatio: this.longShortRatios[coin.symbol] || 'N/A',
+      }));
+    },
+    setLimit(limit) {
+      this.limit = limit;
+    },
+    filterAsset(asset) {
+      this.asset = asset;
+    },
+    sortBy(key, order) {
+      this.sort.key = key;
+      this.sort.order = order;
+    },
+    connectSocket() {
+      const url = "wss://fstream.binance.com/stream";
+      const stream = "!ticker@arr";
+      this.socket = new WebSocket(`${url}?streams=${stream}`);
+
+      this.socket.onopen = () => {
+        this.loaderVisible = false;
+        console.log("WebSocket connection opened.");
+      };
+
+      this.socket.onmessage = (event) => {
+        const data = JSON.parse(event.data).data;
+        this.updateCoinPrices(data);
+      };
+
+      this.socket.onclose = () => {
+        console.log("WebSocket connection closed. Reconnecting...");
+        setTimeout(this.connectSocket, 1000);
+      };
+
+      this.socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        this.socket.close();
+      };
+    },
+    updateCoinPrices(data) {
+      this.coins = this.coins.map(coin => {
+        const ticker = data.find(t => t.s === coin.symbol);
+        if (ticker) {
+          const newHistory = coin.history.slice(-29).concat(Number(ticker.c));
+          const volatility = ((ticker.h - ticker.l) / ticker.o) * 100; // Exemplo de cálculo de volatilidade
+          return {
+            ...coin,
+            close: Number(ticker.c),
+            change: Number(ticker.p),
+            percent: Number(ticker.P),
+            assetVolume: Number(ticker.q),
+            trades: Number(ticker.n),
+            history: newHistory,
+            volatility: volatility,
+          };
+        }
+        return coin;
+      });
+    },
+    saveLSRToLocalStorage() {
+      const lsrData = JSON.stringify(this.longShortRatios);
+      localStorage.setItem("lsr", lsrData);
+    },
+    loadLSRFromLocalStorage() {
+      const lsrData = localStorage.getItem("lsr");
+      if (lsrData) {
+        this.longShortRatios = JSON.parse(lsrData);
+        this.updateCoinsWithRatios();
+      }
+    },
+    toggleDarkMode() {
+      this.isDarkMode = !this.isDarkMode;
+    },
+    toggleFavorite(coin) {
+      if (this.favoriteCoins.includes(coin.symbol)) {
+        this.favoriteCoins = this.favoriteCoins.filter(fav => fav !== coin.symbol);
+      } else {
+        this.favoriteCoins.push(coin.symbol);
+      }
+      localStorage.setItem("favoriteCoins", JSON.stringify(this.favoriteCoins));
+    },
+    loadFavoriteCoins() {
+      const favoriteCoins = localStorage.getItem("favoriteCoins");
+      if (favoriteCoins) {
+        this.favoriteCoins = JSON.parse(favoriteCoins);
+      }
+    },
+    resetPercentagesAt9PM() {
+      const now = new Date();
+      const utcOffset = -3; // Horário de Brasília é UTC-3
+      const hoursUntil9PM = (21 - (now.getUTCHours() + utcOffset) + 24) % 24;
+      const millisecondsUntil9PM = hoursUntil9PM * 60 * 60 * 1000 - (now.getMinutes() * 60 * 1000 + now.getSeconds() * 1000 + now.getMilliseconds());
+
+      setTimeout(() => {
+        this.resetPositivePercentages();
+        setInterval(this.resetPositivePercentages, 24 * 60 * 60 * 1000); // Repetir a cada 24 horas
+      }, millisecondsUntil9PM);
+    },
+    resetPositivePercentages() {
+      this.coins = this.coins.map(coin => ({
+        ...coin,
+        percent: coin.percent > 0 ? 0 : coin.percent,
+      }));
+    },
   },
 });
