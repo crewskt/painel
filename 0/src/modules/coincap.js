@@ -34,7 +34,7 @@ export default class Coincap extends Bus {
    */
   fetchAll() {
     if ( !this._ajax ) return;
-    this._ajax.get( `https://api.coincap.io/v2/assets?limit=2000`, {
+    this._ajax.get( `https://fapi.coincap.io/v2/assets?limit=2000`, {
       type: 'json',
       cache: 600,
       proxy: false,
@@ -51,7 +51,7 @@ export default class Coincap extends Bus {
    */
   fetchCoin( id, cb ) {
     if ( !this._ajax || !id ) return;
-    this._ajax.get( `https://api.coincap.io/v2/assets/${id}`, {
+    this._ajax.get( `https://fapi.coincap.io/v2/assets/${id}`, {
       type: 'json',
       cache: 300,
       proxy: false,
