@@ -185,6 +185,15 @@ new Vue({
             volatility: 0, // Inicialmente 0, você pode calcular isso conforme necessário
           }));
 
+        // Definindo a imagem padrão como "INDISPONIVEL.PNG" se não estiver disponível
+        this.coins.forEach(coin => {
+          const img = new Image();
+          img.src = coin.icon;
+          img.onerror = () => {
+            coin.icon = "https://betabot.store/icons/INDISPONIVEL.PNG";
+          };
+        });
+
         // Obter a última moeda listada
         await this.loadLastListedCoin();
 
