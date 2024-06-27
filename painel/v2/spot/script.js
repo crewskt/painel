@@ -79,7 +79,7 @@ new Vue({
       // endpoint: "wss://fstream.binance.com/ws/!ticker@arr",
       endpoint: "wss://stream.binance.com:9443/ws/!ticker@arr",
       iconbase:
-         "https://coinicon2.s3.us-east-2.amazonaws.com/c2/", // https://raw.githubusercontent.com/rainner/binance-watch/master/public/images/icons/
+         "https://betabot.store/icons/", // https://raw.githubusercontent.com/rainner/binance-watch/master/public/images/icons/
       cache: {}, // coins data cache
       coins: [], // live coin list from api
       asset: "USDT", // filter by base asset pair
