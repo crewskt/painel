@@ -25,8 +25,11 @@
 
 
 
+
+
+
   /* Estilo para desktop */
-  @media screen and (min-width: 768px) {
+  @media screen and (min-width: 568px) {
     .volatility-text {
       font-size: 15px; /* Tamanho da fonte para desktop */
     }
