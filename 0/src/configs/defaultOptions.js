@@ -38,13 +38,13 @@ export default {
     market: 'USDT',       // default selected market token
     sort: 'marketVolume', // price data to sort by
     order: 'desc',        // price sort direction
-    limit: 20,            // how many entries to show
+    limit: 10,            // how many entries to show
   },
 
   // news related options
   news: {
     enabled: true, // enable fetching on a timer
-    notify: false,  // show push notifications for news
+    notify: true,  // show push notifications for news
     send: false,    // include news in outgoing notifications (email/telegram)
     interval: 5,    // how often to try fetching from each source (secs)
     delay: 500,     // how long to wait before fetching again from each source (secs)
@@ -56,7 +56,7 @@ export default {
 
   // binance api config
   binance: {
-    enabled: false, // status
+    enabled: true, // status
     apikey: '',     // api key
     apisecret: '',  // api secret
   },
