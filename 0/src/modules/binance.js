@@ -13,7 +13,7 @@ export default class Binance extends Bus {
   constructor() {
     super();
     this._ajax      = null;
-    this._apiurl    = 'https://fapi.binance.com/fapi';
+    this._apiurl    = 'https://fapi.binance.com/fapi/v1/ticker/24hr';
     this._wssurl    = 'wss://fstream.binance.com/stream/!ticker@arr'//'fwss://stream.binance.com:9443';
     this._apikey    = '';    // binance API key
     this._apisecret = '';    // binance API secret
