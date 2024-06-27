@@ -362,7 +362,7 @@ export default class Binance extends Bus {
     this.emit( 'user_init', Date.now() );
     this.stopUserStream();
 
-    this._ajax.post( this.getPublicUrl( '/v1/userDataStream' ), {
+    this._ajax.post( this.getPublicUrl( '/v3/userDataStream' ), {
       type: 'json',
       headers: { 'X-MBX-APIKEY': this._apikey },
 
