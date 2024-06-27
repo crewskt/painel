@@ -53,6 +53,20 @@
     }
   </style>
 </head>
+
+<div class="zoom-controls">
+  <label for="zoom-level">Zoom:</label>
+  <input type="range" id="zoom-level" min="50" max="150" value="100" step="10">
+</div>
+
+<script>
+  document.getElementById('zoom-level').addEventListener('input', function() {
+    document.body.style.zoom = this.value + '%';
+  });
+</script>
+
+
+  
 <body>
   <div id="app" v-cloak>
     <header class="header-wrap">
