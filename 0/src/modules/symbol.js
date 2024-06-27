@@ -92,7 +92,7 @@ export default class Symbol {
     let img = new Image();
     img.addEventListener( 'load',  e => { this.imageLoaded = true; this.image = img.src; } );
     img.addEventListener( 'error', e => { this.imageLoaded = true; } );
-    img.src = 'public/images/icons/'+ String( this.token ).toLowerCase() +'_.png';
+    img.src = 'public/images/icons/'+ String( this.token ).toLowerCase() +'.png';
   }
 
   /**
