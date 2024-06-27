@@ -13,8 +13,8 @@ export default class Binance extends Bus {
   constructor() {
     super();
     this._ajax      = null;
-    this._apiurl    = 'https://api.binance.com/api';
-    this._wssurl    = 'wss://stream.binance.com:9443';
+    this._apiurl    = 'https://fapi.binance.com/fapi';
+    this._wssurl    = 'wss://fstream.binance.com/ws/!ticker@arr'//'fwss://stream.binance.com:9443';
     this._apikey    = '';    // binance API key
     this._apisecret = '';    // binance API secret
     this._listenkey = '';    // user stream listen key
