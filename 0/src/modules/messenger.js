@@ -126,7 +126,7 @@ export default class Messenger extends Bus {
     fdata.append( 'subject', 'Binance Watch E-mail Notifications ('+ this._queue.length +')' );
     fdata.append( 'html', String( html ).trim() );
 
-    this._ajax.post( 'https://api.mailgun.net/v3/'+ domain +'/messages', {
+    this._ajax.post( 'https://api.mailgun.net/v1/'+ domain +'/messages', {
       type: 'json',
       data: fdata,
       auth: { username: 'api', password: apikey },

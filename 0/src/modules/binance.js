@@ -95,7 +95,7 @@ export default class Binance extends Bus {
    */
   fetchMarketsData() {
     if ( !this._ajax ) return;
-    const remote = `${this._apiurl}/v3/exchangeInfo`;
+    const remote = `${this._apiurl}/v1/exchangeInfo`;
     const local  = `public/json/exchangeInfo.json`;
 
     // build markets data and emit it out
@@ -128,7 +128,7 @@ export default class Binance extends Bus {
    */
   fetchChartData( symbol, cb ) {
      if ( !this._ajax || !symbol ) return;
-     const endpoint = `${this._apiurl}/v3/klines?symbol=${symbol}&interval=1h&limit=168`;
+     const endpoint = `${this._apiurl}/v1/klines?symbol=${symbol}&interval=1h&limit=168`;
      const prices   = [];
 
     this._ajax.get( endpoint, {
@@ -271,7 +271,7 @@ export default class Binance extends Bus {
     if ( type === 'LIMIT' ) Object.assign( params, { price, timeInForce: inforce } );
     Object.assign( params, { newOrderRespType: 'RESULT' } );
 
-    this._ajax.post( this.getSignedUrl( '/v3/order', params ), {
+    this._ajax.post( this.getSignedUrl( '/v1/order', params ), {
       type: 'json',
       headers: { 'X-MBX-APIKEY': this._apikey },
 
@@ -296,7 +296,7 @@ export default class Binance extends Bus {
     if ( !this._apikey || !this._ajax ) return;
     if ( !symbol || !orderId ) return;
 
-    this._ajax.delete( this.getSignedUrl( '/v3/order', { symbol, orderId } ), {
+    this._ajax.delete( this.getSignedUrl( '/v1/order', { symbol, orderId } ), {
       type: 'json',
       headers: { 'X-MBX-APIKEY': this._apikey },
 
@@ -317,7 +317,7 @@ export default class Binance extends Bus {
   fetchUserAccount() {
     if ( !this._apikey || !this._ajax ) return;
 
-    this._ajax.get( this.getSignedUrl( '/v3/account' ), {
+    this._ajax.get( this.getSignedUrl( '/v1/account' ), {
       type: 'json',
       headers: { 'X-MBX-APIKEY': this._apikey },
 
@@ -339,7 +339,7 @@ export default class Binance extends Bus {
   fetchOpenOrders() {
     if ( !this._apikey || !this._ajax ) return;
 
-    this._ajax.get( this.getSignedUrl( '/v3/openOrders' ), {
+    this._ajax.get( this.getSignedUrl( '/v1/openOrders' ), {
       type: 'json',
       headers: { 'X-MBX-APIKEY': this._apikey },
 
