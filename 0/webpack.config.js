@@ -8,7 +8,7 @@ const isProd = ( process.env.NODE_ENV === 'production' );
 
 // dev server and globals styles
 const serverHost = 'localhost';
-const serverPort = 8000;
+const serverPort = 80;
 const serverRoot = path.join( __dirname, '/' );
 const appEntry   = './src/app.js';
 const bundleDir  = './public/bundles/';
