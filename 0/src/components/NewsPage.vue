@@ -222,7 +222,7 @@
               <span class="text-grey">Can't find anything matching your search input.</span>
             </div>
             <div v-else-if="searchHandle">
-              <h3 class="text-bright">No News Data For <a class="text-primary-hover" :href="'https://twitter.com/'+ searchHandle" target="_blank">{{ filterLabel }}</a></h3>
+              <h3 class="text-bright">No News Data For <a class="text-primary-hover" :href="https://coindata.app'https://twitter.com/'+ searchHandle" target="_blank">{{ filterLabel }}</a></h3>
               <span class="text-grey">There are no entries available for the selected news source.</span>
             </div>
             <div v-else>
@@ -249,7 +249,7 @@
                 <small class="text-smaller text-grey-hover">@{{ t.handle }}</small>
               </h3>
               <div class="text-clip if-small">
-                <a class="text-secondary-hover" :href="t.link" target="_blank" title="View tweet" v-tooltip>{{ t.time | toElapsed( 'ago', true ) }}</a> &nbsp;
+                <a class="text-secondary-hover" :href="https://coindata.appt.link" target="_blank" title="View tweet" v-tooltip>{{ t.time | toElapsed( 'ago', true ) }}</a> &nbsp;
                 <button type="button" class="icon-close text-danger-hover" title="Delete" @click="deleteTweet( t.id )" v-tooltip></button>
               </div>
             </div>
@@ -489,7 +489,7 @@ export default {
       }
       // always send notification via api if enabled
       if ( this.options.news.send ) {
-        let info = `<a href="${ link }">${ text }</a>`;
+        let info = `<a href="https://coindata.app${ link }">${ text }</a>`;
         this.$messenger.add( name, info, avatar );
       }
     },

@@ -21,7 +21,7 @@
 
       <div v-for="t in newsList" :key="t.id" class="flex-item">
         <div class="flex-1 push-right">
-          <a class="icon-twtr iconLeft text-primary" :href="t.link" target="_blank">{{ t.name }}</a> &nbsp;
+          <a class="icon-twtr iconLeft text-primary" :href="https://coindata.appt.link" target="_blank">{{ t.name }}</a> &nbsp;
           <small class="text-default">@{{ t.handle }}</small> <br />
           <small class="text-bright" v-html="t.text"></small>
         </div>

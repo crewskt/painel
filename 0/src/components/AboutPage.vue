@@ -6,8 +6,8 @@
         Binance Price Watch Web App <i class="icon-down-open"></i>
       </div>
       <p>
-        This application connects to the <a class="text-primary-hover" @click="goBinance" href="#">Binance.com</a>
-        public <a href="https://github.com/binance-exchange/binance-official-api-docs" target="_blank">API</a>
+        This application connects to the <a class="text-primary-hover" @click="goBinance" href="https://coindata.app#">Binance.com</a>
+        public <a href="https://coindata.apphttps://github.com/binance-exchange/binance-official-api-docs" target="_blank">API</a>
         to get live 24h price change data for all crypto trading pairs on their platform and allows you to set
         custom alerts or watch for price change in real time and get desktop notifications when something triggers
         your alerts or price watch settings.
@@ -15,9 +15,9 @@
       <p>
         This app runs entirely on the browser and only makes external requests to fetch data from various
         API endpoints related to cryptocurrency. Any persisting data is stored in the browser's
-        <a href="https://developer.mozilla.org/en-US/docs/Web/API/Storage" target="_blank">localStorage</a> database.
+        <a href="https://coindata.apphttps://developer.mozilla.org/en-US/docs/Web/API/Storage" target="_blank">localStorage</a> database.
         In order to get desktop notifications, you must
-        <a href="https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API" target="_blank">Grant Notification Permission</a>
+        <a href="https://coindata.apphttps://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API" target="_blank">Grant Notification Permission</a>
         in your browser.
       </p>
     </div>
@@ -29,8 +29,8 @@
         Author  Links &amp; Donation <i class="icon-down-open"></i>
       </div>
       <div class="push-bottom">
-        <a class="icon-globe iconLeft" href="https://rainnerlins.com/" target="_blank">Rainner Lins</a> &nbsp;
-        <a class="icon-ghub iconLeft" href="https://hithub.com/raintek" target="_blank">Github Profile</a> &nbsp;
+        <a class="icon-globe iconLeft" href="https://coindata.apphttps://rainnerlins.com/" target="_blank">Rainner Lins</a> &nbsp;
+        <a class="icon-ghub iconLeft" href="https://coindata.apphttps://hithub.com/raintek" target="_blank">Github Profile</a> &nbsp;
       </div>
       <div class="push-bottom">
         This app is frequently maintained by the developer to help improve it at no cost to anyone but the developer.
@@ -70,23 +70,23 @@
       </div>
       <ul>
         <li>
-          <a href="https://github.com/binance-exchange/binance-official-api-docs" target="_blank">Binance API</a> &nbsp;
+          <a href="https://coindata.apphttps://github.com/binance-exchange/binance-official-api-docs" target="_blank">Binance API</a> &nbsp;
           <span>Socket connection for live 24h price change data.</span>
         </li>
         <li>
-          <a href="https://github.com/CoinCapDev/CoinCap.io" target="_blank">Coincap API</a> &nbsp;
+          <a href="https://coindata.apphttps://github.com/CoinCapDev/CoinCap.io" target="_blank">Coincap API</a> &nbsp;
           <span>Aggregated global data for specific tokens.</span>
         </li>
         <li>
-          <a href="https://www.mailgun.com/" target="_blank">Mailgun API</a> &nbsp;
+          <a href="https://coindata.apphttps://www.mailgun.com/" target="_blank">Mailgun API</a> &nbsp;
           <span>Mailgun API for outgoing notifications via e-mail.</span>
         </li>
         <li>
-          <a href="https://core.telegram.org/bots#creating-a-new-bot" target="_blank">Telegram Bot API</a> &nbsp;
+          <a href="https://coindata.apphttps://core.telegram.org/bots#creating-a-new-bot" target="_blank">Telegram Bot API</a> &nbsp;
           <span>Telegram Bot API for outgoing notifications via the app.</span>
         </li>
         <li>
-          <a href="https://github.com/cjdowner/cryptocurrency-icons" target="_blank">Crypto Icons</a> &nbsp;
+          <a href="https://coindata.apphttps://github.com/cjdowner/cryptocurrency-icons" target="_blank">Crypto Icons</a> &nbsp;
           <span>Nice looking crypto icons.</span>
         </li>
       </ul>

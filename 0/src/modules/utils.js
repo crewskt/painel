@@ -14,7 +14,7 @@ module.exports = {
 
   // convert URLs into clickable links
   linkUrl( text ) {
-    return String( text || '' ).replace( /(https?\:\/\/[\w\-\.\?\=\&\%\/\#]+)/gi, '<a href="$1" target="_blank">$1</a>' );
+    return String( text || '' ).replace( /(https?\:\/\/[\w\-\.\?\=\&\%\/\#]+)/gi, '<a href="https://coindata.app$1" target="_blank">$1</a>' );
   },
 
   // convert html tags to text content

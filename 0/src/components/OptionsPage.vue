@@ -73,9 +73,9 @@
           <div class="text-small text-grey">
             <p>
               External proxy server used to route outgoing HTTP requests from this app to get around the browser's built-in
-              <a class="text-nowrap" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS" target="_blank">Cross-Origin Resource Sharing</a>
+              <a class="text-nowrap" href="https://coindata.apphttps://developer.mozilla.org/en-US/docs/Web/HTTP/CORS" target="_blank">Cross-Origin Resource Sharing</a>
               (CORS) protection. You can run your own proxy server by installing
-              <a class="text-nowrap" href="https://github.com/Rob--W/cors-anywhere" target="_blank">CORS-Anywhere</a>.
+              <a class="text-nowrap" href="https://coindata.apphttps://github.com/Rob--W/cors-anywhere" target="_blank">CORS-Anywhere</a>.
             </p>
           </div>
         </section>
@@ -97,7 +97,7 @@
           </div>
           <div class="text-small text-grey">
             <p>
-              Provide your <a href="#" @click.prevent="goBinance">Binance API keys</a>
+              Provide your <a href="https://coindata.app#" @click.prevent="goBinance">Binance API keys</a>
               if you wish to use the trading features available within this app.
               The key you enter here will be stored in your web browser's local storage for use within this app only.
               You can find your key, or create a new one by accessing your account page on the Binance website.
@@ -126,7 +126,7 @@
           </div>
           <div class="text-small text-grey">
             <p>
-              This app can connect to the <a class="text-nowrap" href="https://www.mailgun.com/" target="_blank">Mailgun API</a>
+              This app can connect to the <a class="text-nowrap" href="https://coindata.apphttps://www.mailgun.com/" target="_blank">Mailgun API</a>
               for sending outgoing e-mail notifications using a Mailgun account. You will need to add your Mailgun account details above.
             </p>
           </div>
@@ -149,10 +149,10 @@
           </div>
           <div class="text-small text-grey">
             <p>
-              This app can connect to the <a class="text-nowrap" href="https://core.telegram.org/bots#creating-a-new-bot" target="_blank">Telegram Bot API</a>
+              This app can connect to the <a class="text-nowrap" href="https://coindata.apphttps://core.telegram.org/bots#creating-a-new-bot" target="_blank">Telegram Bot API</a>
               for sending outgoing notifications using the Telegram app on desktop or mobile.
               You will need to provide a Bot API Token and the User chat ID above.
-              You can use a bot such as <a href="https://t.me/@JsonDumpBot" target="_blank">@JsonDumpBot</a> to find out what your user chat_id is.
+              You can use a bot such as <a href="https://coindata.apphttps://t.me/@JsonDumpBot" target="_blank">@JsonDumpBot</a> to find out what your user chat_id is.
             </p>
           </div>
         </section>
